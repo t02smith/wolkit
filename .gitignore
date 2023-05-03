@@ -1,0 +1,4 @@
+wolkit.db
+venv
+**/__pycache__
+.idea
