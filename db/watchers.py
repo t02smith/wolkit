@@ -3,6 +3,21 @@ from lib.watchers import Watcher
 from db.devices import _device_tuple_factory
 
 
+#
+
+def _watcher_tuple_factory(w) -> Watcher:
+    return Watcher(**{
+        "id": w[0],
+        "mac_addr": w[1],
+        "bluetooth": w[3] == 1,
+        "ip_addr": w[2],
+        "wireless": [4] == 1,
+        "wakes": get_wakes_by_watcher_id(w[0])
+    })
+
+
+#
+
 def create_watchers_table() -> None:
     """
     Creates a new table to for devices that we listen for
@@ -50,6 +65,23 @@ def get_all_watchers():
                 SELECT wake_device_id 
                 FROM watchers_mapping
                 WHERE watched_device_id=?
-            );""", (wd[0], )).fetchall()]
+            );""", (wd[0],)).fetchall()]
         }))
     return watcher_devices
+
+
+def get_watcher_by_id(watcher_id: int):
+    wd = _cursor.execute("SELECT * FROM watchers WHERE id=?", (watcher_id,)).fetchone()
+    if wd is None:
+        return None
+
+    return _watcher_tuple_factory(wd)
+
+
+def get_wakes_by_watcher_id(watcher_id: int):
+    return [d[0] for d in _cursor.execute(
+        """SELECT devices.alias 
+        FROM watchers_mapping 
+        NATURAL JOIN devices 
+        WHERE watchers_mapping.watched_device_id=?""",
+        (watcher_id,)).fetchall()]

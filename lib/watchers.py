@@ -25,6 +25,6 @@ class Watcher(BaseModel):
     wireless: bool
 
     # the devices that we wake when this device is found
-    wakes: List[Device]
+    wakes: List[Device | int | str]
 
 

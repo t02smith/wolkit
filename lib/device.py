@@ -29,6 +29,11 @@ class Device(BaseModel):
 
 
 def is_active(ip_addr: str) -> bool:
+    """
+    Sends an ARP request to check if a device is active
+    :param ip_addr: the target device's ip address
+    :return: device is active or not
+    """
     icmp_req = IP(dst=ip_addr) / ICMP()
     res = sr1(icmp_req, timeout=1, verbose=False)
 
