@@ -11,7 +11,11 @@ def _device_tuple_factory(device) -> Device:
 
 # DB functions
 
-def create_devices_table():
+def create_devices_table() -> None:
+    """
+    Create a new devices tables
+    :return: None
+    """
     _cursor.execute("""CREATE TABLE IF NOT EXISTS devices(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             mac_addr TEXT NOT NULL UNIQUE,
@@ -20,19 +24,22 @@ def create_devices_table():
         );""")
 
 
+# Select statements
+
 def get_all_devices() -> List[Device]:
+    """
+    Returns a list of all devices recorded
+    :return: list of recorded devices
+    """
     return [_device_tuple_factory(d) for d in _cursor.execute("SELECT * FROM devices;").fetchall()]
 
 
-def new_device(device: Device):
-    _cursor.execute(
-        "INSERT INTO devices (mac_addr, alias, ip_addr) VALUES (?, ?, ?);",
-        (device.mac_addr, device.alias, device.ip_addr)
-    )
-    _connection.commit()
-
-
 def find_device_by_alias(alias: str) -> Device | None:
+    """
+    Find a device by its alias and return it
+    :param alias: the alias to search for
+    :return: the device if it exists or none
+    """
     result = _cursor.execute(
         "SELECT * FROM devices WHERE alias=?;",
         [alias]
@@ -42,3 +49,13 @@ def find_device_by_alias(alias: str) -> Device | None:
         return None
 
     return _device_tuple_factory(result)
+
+
+# Insert statements
+
+def new_device(device: Device):
+    _cursor.execute(
+        "INSERT INTO devices (mac_addr, alias, ip_addr) VALUES (?, ?, ?);",
+        (device.mac_addr, device.alias, device.ip_addr)
+    )
+    _connection.commit()

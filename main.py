@@ -3,14 +3,22 @@ from routes import router
 import uvicorn
 from db.setup import setup_db
 from lib.schedule import schedule_watcher
+from net.sniffer import listen_for_packets
+from net.wireless import watch_LAN
 import asyncio
+
+HOST_IP_ADDRESS: str = "192.168.43.75"
+# target = 192.168.43.136
 
 app = FastAPI()
 app.include_router(router)
 
+
 @app.on_event("startup")
 async def start_schedule_watcher():
     asyncio.get_event_loop().create_task(schedule_watcher())
+    asyncio.get_event_loop().create_task(listen_for_packets(HOST_IP_ADDRESS))
+    asyncio.get_event_loop().create_task(watch_LAN())
 
 if __name__ == "__main__":
     setup_db()
