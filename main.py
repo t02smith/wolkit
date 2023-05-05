@@ -1,14 +1,9 @@
-import logging
-
 from fastapi import FastAPI
 from routes import router
 import uvicorn
 from db.setup import setup_db
 from db.services import get_services
-from lib.schedule import schedule_watcher
-from net.sniffer import listen_for_packets
-from net.wireless import watch_LAN
-from net.bluetooth import watch_bluetooth
+from lib.services import enable_service
 import asyncio
 import logging
 
@@ -44,25 +39,18 @@ app = FastAPI(
             "name": "Services",
             "description": "Enable or disable any background services, such as the Scheduler."
         }
-    ]
+    ],
+    debug=True
 )
 app.include_router(router)
 
 
 @app.on_event("startup")
-async def start_schedule_watcher():
+async def start_services():
     services = get_services()
-    if services[0].active:
-        asyncio.get_event_loop().create_task(schedule_watcher())
-
-    if services[1].active:
-        asyncio.get_event_loop().create_task(listen_for_packets(HOST_IP_ADDRESS))
-
-    if services[2].active:
-        asyncio.get_event_loop().create_task(watch_LAN())
-
-    if services[3].active:
-        asyncio.get_event_loop().create_task(watch_bluetooth())
+    for s in services:
+        if s.active:
+            enable_service(s.name)
 
 if __name__ == "__main__":
     setup_db()

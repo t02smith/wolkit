@@ -1,6 +1,4 @@
-from lib.devices import is_active
 import db.watchers as wat_db
-import time
 import datetime
 import bluetooth
 import logging as log

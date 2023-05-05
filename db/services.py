@@ -1,12 +1,5 @@
 from db import _cursor, _connection
-from lib.services import Service
-
-services = [
-    ("scheduler", "Schedules days and times each week to wake a device.", 1),
-    ("sniffer", "Listens for packets being sent to a target computer and will wake the device if need be.", 0),
-    ("lan_listen", "Wakes a target device based upon whether a given other device is present in the network", 0),
-    ("bluetooth", "Listen for nearby bluetooth devices to trigger device wakes.", 1)
-]
+from lib.services import Service, services
 
 
 def create_services_table():
@@ -16,7 +9,11 @@ def create_services_table():
         active INTEGER NOT NULL
     );""")
 
-    _cursor.executemany("""INSERT OR IGNORE INTO services VALUES (?, ?, ?)""", services)
+    ss = []
+    for s_name, s in services.items():
+        ss.append((s_name, s[0], s[1]))
+
+    _cursor.executemany("""INSERT OR IGNORE INTO services VALUES (?, ?, ?)""", ss)
 
 
 def get_services():
@@ -27,5 +24,19 @@ def get_services():
     }) for s in _cursor.execute("SELECT * FROM services;").fetchall()]
 
 
-# def set_service(service_name: str, new_value: bool):
-#
+def set_service(service_name: str, new_value: bool):
+    service = _cursor.execute("SELECT * FROM services WHERE name=?", [service_name]).fetchone()
+    if service is None:
+        raise ValueError(f"Service {service_name} not found")
+
+    enabled = service[2] == 1
+    if new_value == enabled:
+        raise ValueError(f"Service {service_name} already {'enabled' if enabled else 'disabled'}")
+
+    _cursor.execute("UPDATE services SET active=? WHERE name=?;", (new_value, service_name))
+    _connection.commit()
+
+
+def set_all_services(new_value: bool):
+    _cursor.execute("UPDATE services SET active=?;", (1 if new_value else 0))
+    _connection.commit()
