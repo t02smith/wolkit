@@ -1,9 +1,10 @@
-from lib.device import Device
-from typing import List
+from lib.devices import WakeableDevice
+from typing import List, Union
+import datetime
 from pydantic import BaseModel
 
 
-class Watcher(BaseModel):
+class WatcherDevice(BaseModel):
     """
     We listen for this device over several mediums and if we find it then
     we wake the target device as it is specified
@@ -25,6 +26,21 @@ class Watcher(BaseModel):
     wireless: bool
 
     # the devices that we wake when this device is found
-    wakes: List[Device | int | str]
+    wakes: List[Union[WakeableDevice, int, str]]
+
+    """
+    Once the devices have been woken up, they won't need to be re-awoken straight
+    away. By adding a timeout, we stop searching for this watcher device for a given
+    amount of time
+    """
+    timeout_minutes: int
+    last_checked: Union[datetime.datetime, None] = None
+
+    def in_timeout(self) -> bool:
+        if self.last_checked is None:
+            return False
+
+        timestamp = datetime.datetime.now()
+        return (timestamp - self.last_checked).total_seconds() // 60 <= self.timeout_minutes
 
 

@@ -2,7 +2,7 @@ from re import search
 import time
 import struct
 import socket
-
+import logging as log
 
 def magic_packet(mac_addr: str):
     """
@@ -24,7 +24,7 @@ def magic_packet(mac_addr: str):
             struct.pack('B', int(data[j: j + 2], 16))
         ])
 
-    print(f"Created magic packet {send_data}")
+    log.debug(f"Created magic packet {send_data}")
     return send_data
 
 
@@ -34,8 +34,8 @@ def send_magic_packet(mac_addr: str, broadcast_addr: str):
     Assumes that the mac_addr is well-formed.
     """
     packet = magic_packet(mac_addr)
-    print(f"Broadcasting magic packet to wake {mac_addr}")
+    log.debug(f"Broadcasting magic packet to wake {mac_addr}")
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     s.sendto(packet, (broadcast_addr, 7))
-    print(f"Broadcast magic packet for {mac_addr}")
+    log.debug(f"Broadcast magic packet for {mac_addr}")

@@ -1,7 +1,7 @@
 from db import _cursor, _connection
 from typing import List
 from lib.schedule import Schedule
-from lib.device import Device
+from lib.devices import WakeableDevice
 
 
 # Utility
@@ -12,7 +12,7 @@ def _schedule_factory_for_device_obj(schedule):
         "weekday": schedule[2],
         "hour": schedule[3],
         "minute": schedule[4],
-        "device": Device(**{
+        "device": WakeableDevice(**{
             "id": schedule[1],
             "mac_addr": schedule[6],
             "alias": schedule[7],

@@ -1,18 +1,19 @@
 from db import _cursor, _connection
-from lib.watchers import Watcher
+from lib.watchers import WatcherDevice
 from db.devices import _device_tuple_factory
 
 
 #
 
-def _watcher_tuple_factory(w) -> Watcher:
-    return Watcher(**{
+def _watcher_tuple_factory(w) -> WatcherDevice:
+    return WatcherDevice(**{
         "id": w[0],
         "mac_addr": w[1],
         "bluetooth": w[3] == 1,
         "ip_addr": w[2],
         "wireless": [4] == 1,
-        "wakes": get_wakes_by_watcher_id(w[0])
+        "wakes": get_wakes_by_watcher_id(w[0]),
+        "timeout_minutes": w[5]
     })
 
 
@@ -28,7 +29,8 @@ def create_watchers_table() -> None:
         mac_addr TEXT UNIQUE,
         ip_addr TEXT UNIQUE,
         bluetooth INTEGER NOT NULL,
-        wireless INTEGER NOT NULL
+        wireless INTEGER NOT NULL,
+        timeout INTEGER NOT NULL
     );""")
 
 
@@ -53,12 +55,13 @@ def get_all_watchers():
     wds = _cursor.execute("SELECT * FROM watchers;").fetchall()
     watcher_devices = []
     for wd in wds:
-        watcher_devices.append(Watcher(**{
+        watcher_devices.append(WatcherDevice(**{
             "id": wd[0],
             "mac_addr": wd[1],
             "ip_addr": wd[2],
-            "bluetooth": True if wd[3] == 1 else False,
-            "wireless": True if wd[4] == 1 else False,
+            "bluetooth": wd[3] == 1,
+            "wireless": wd[4] == 1,
+            "timeout_minutes": wd[5],
             "wakes": [_device_tuple_factory(d) for d in _cursor.execute("""
             SELECT * from devices 
             WHERE id in (
@@ -85,3 +88,13 @@ def get_wakes_by_watcher_id(watcher_id: int):
         NATURAL JOIN devices 
         WHERE watchers_mapping.watched_device_id=?""",
         (watcher_id,)).fetchall()]
+
+
+def create_watcher(watcher: WatcherDevice) -> WatcherDevice:
+    _cursor.execute("""
+        INSERT INTO watchers (mac_addr, ip_addr, bluetooth, wireless, timeout)
+        VALUES (?, ?, ?, ?, ?)
+        """, (watcher.mac_addr, watcher.ip_addr, 1 if watcher.bluetooth else 0, 1 if watcher.wireless else 0,
+              watcher.timeout_minutes))
+    _connection.commit()
+    return watcher

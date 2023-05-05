@@ -1,23 +1,30 @@
+import datetime
 import time
-from lib.device import is_active
+from lib.devices import is_active
 import db.watchers as wat_db
 import logging as log
+import asyncio
 
 async def watch_LAN():
     """
-    Watch the LAN for registered devices appearing\
-    :return:
+    Watch the LAN for registered devices appearing
+    :return: None
     """
     watchers = list(filter(lambda d: d.wireless, wat_db.get_all_watchers()))
     if len(watchers) == 0:
-        log.info("No devices to watch => terminating")
+        log.debug("No devices to watch => terminating")
         return
 
     while True:
+        log.debug("scanning for local wireless devices")
         for device in watchers:
+            if device.in_timeout():
+                continue
+
             if not is_active(device.ip_addr):
                 continue
 
-            print(f"Device found => starting wake for {len(device.wakes)} devices")
+            log.debug(f"Device {device.ip_addr} found => starting wake for {len(device.wakes)} devices")
             [d.wake() for d in device.wakes]
-        time.sleep(5)
+            device.last_checked = datetime.datetime.now()
+        await asyncio.sleep(5)

@@ -12,7 +12,7 @@ async def listen_for_packets(host_ip_addr: str) -> None:
     log.info("starting device listener")
     devices = dev_db.get_all_devices()
     if len(devices) == 0:
-        log.info("No tracked devices => listen not started")
+        log.debug("No tracked devices => listen not started")
         return
 
     for d in devices:

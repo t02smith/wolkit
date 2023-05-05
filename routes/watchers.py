@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 import db.watchers as wat_db
-from lib.watchers import Watcher
+from lib.watchers import WatcherDevice
 
 watchers_router = APIRouter(prefix="/watchers")
 
@@ -14,6 +14,7 @@ class WatcherRequest(BaseModel):
     ip_addr: str
     bluetooth: bool
     wireless: bool
+    timeout_minutes: int
 
 
 class WatcherResponse(BaseModel):
@@ -22,9 +23,10 @@ class WatcherResponse(BaseModel):
     bluetooth: bool
     wireless: bool
     wakes: List[str]
+    timeout_minutes: int
 
 
-def _watcher_to_watcher_respond(watcher: Watcher) -> WatcherResponse:
+def _watcher_to_watcher_respond(watcher: WatcherDevice) -> WatcherResponse:
     return WatcherResponse(**{
             **watcher.__dict__,
             "wakes": list(map(lambda d: d.alias, watcher.wakes))
@@ -70,4 +72,7 @@ def get_watcher(watcher_id: int):
     name="Create a new watcher"
 )
 def new_watcher(watcher: WatcherRequest):
-    pass
+    return wat_db.create_watcher(WatcherDevice(**{
+        **watcher.__dict__,
+        "devices": []
+    }))

@@ -1,11 +1,20 @@
 from fastapi import APIRouter, HTTPException
+
+import errors.devices
 from routes.schedule import schedules_router
 from typing import List
-from lib.device import Device
+from lib.devices import WakeableDevice
 import db.devices as dev_db
+from pydantic import BaseModel
 
 devices_router = APIRouter(prefix="/devices")
 devices_router.include_router(schedules_router)
+
+
+class WakeableDeviceRequest(BaseModel):
+    alias: str
+    mac_addr: str
+    ip_addr: str
 
 
 @devices_router.get(
@@ -13,10 +22,10 @@ devices_router.include_router(schedules_router)
     status_code=200,
     name="Get All Devices",
     description="Get a list of all your recorded devices. These devices can be woken up by this API.",
-    response_model=List[Device],
+    response_model=List[WakeableDevice],
     summary="Returns a list of all recorded devices.",
     tags=["Device Management"])
-async def get_all_devices() -> List[Device]:
+async def get_all_devices() -> List[WakeableDevice]:
     return dev_db.get_all_devices()
 
 
@@ -25,12 +34,18 @@ async def get_all_devices() -> List[Device]:
     status_code=201,
     name="Create a New Device",
     description="Create a new device to track and use within this API",
-    response_model=Device,
+    response_model=WakeableDevice,
     summary="Record a new device.",
     tags=["Device Management"])
-async def create_new_device(device: Device) -> Device:
-    dev_db.new_device(device)
-    return device
+async def create_new_device(device: WakeableDeviceRequest) -> WakeableDevice:
+    try :
+        return dev_db.new_device(WakeableDevice(**{
+            **device.__dict__,
+            "id": 0,
+            "status": 2
+        }))
+    except errors.devices.DeviceDetailsAlreadyUsed as e:
+        raise HTTPException(status_code=400, detail=e.args[0])
 
 
 @devices_router.post(

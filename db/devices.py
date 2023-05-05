@@ -1,12 +1,14 @@
-from db import _cursor, _connection
-from typing import List
-from lib.device import Device
+import sqlite3
 
+from db import _cursor, _connection
+from typing import List, Union
+from lib.devices import WakeableDevice
+import errors.devices as err_dev
 
 # Utility
 
-def _device_tuple_factory(device) -> Device:
-    return Device(**{"id": device[0], "mac_addr": device[1], "alias": device[2], "ip_addr": device[3]})
+def _device_tuple_factory(device) -> WakeableDevice:
+    return WakeableDevice(**{"id": device[0], "mac_addr": device[1], "alias": device[2], "ip_addr": device[3]})
 
 
 # DB functions
@@ -26,7 +28,7 @@ def create_devices_table() -> None:
 
 # Select statements
 
-def get_all_devices() -> List[Device]:
+def get_all_devices() -> List[WakeableDevice]:
     """
     Returns a list of all devices recorded
     :return: list of recorded devices
@@ -34,7 +36,7 @@ def get_all_devices() -> List[Device]:
     return [_device_tuple_factory(d) for d in _cursor.execute("SELECT * FROM devices;").fetchall()]
 
 
-def find_device_by_alias(alias: str) -> Device | None:
+def find_device_by_alias(alias: str) -> Union[WakeableDevice, None]:
     """
     Find a device by its alias and return it
     :param alias: the alias to search for
@@ -53,9 +55,15 @@ def find_device_by_alias(alias: str) -> Device | None:
 
 # Insert statements
 
-def new_device(device: Device):
-    _cursor.execute(
-        "INSERT INTO devices (mac_addr, alias, ip_addr) VALUES (?, ?, ?);",
-        (device.mac_addr, device.alias, device.ip_addr)
-    )
+def new_device(device: WakeableDevice) -> WakeableDevice:
+    try :
+        _cursor.execute(
+            "INSERT INTO devices (mac_addr, alias, ip_addr) VALUES (?, ?, ?);",
+            (device.mac_addr.upper(), device.alias, device.ip_addr)
+        )
+    except sqlite3.IntegrityError as e:
+        raise err_dev.DeviceDetailsAlreadyUsed(e.args[0])
+
     _connection.commit()
+
+    return _device_tuple_factory(_cursor.execute("SELECT * FROM devices WHERE id=?", (_cursor.lastrowid, )).fetchone())

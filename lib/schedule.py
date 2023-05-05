@@ -1,15 +1,16 @@
 import time
 import datetime
 from pydantic import BaseModel
-from lib.device import Device
+from lib.devices import WakeableDevice
 import db.schedule as schedule_db
 import asyncio
 import logging as log
+from typing import Union
 
 
 class Schedule(BaseModel):
     id: int
-    device: Device | int
+    device: Union[WakeableDevice, int]
     weekday: int
     hour: int
     minute: int
