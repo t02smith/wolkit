@@ -61,9 +61,8 @@ def new_device(device: WakeableDevice) -> WakeableDevice:
             "INSERT INTO devices (mac_addr, alias, ip_addr) VALUES (?, ?, ?);",
             (device.mac_addr.upper(), device.alias, device.ip_addr)
         )
+        _connection.commit()
+        return _device_tuple_factory(_cursor.execute("SELECT * FROM devices WHERE id=?", (_cursor.lastrowid, )).fetchone())
     except sqlite3.IntegrityError as e:
         raise err_dev.DeviceDetailsAlreadyUsed(e.args[0])
 
-    _connection.commit()
-
-    return _device_tuple_factory(_cursor.execute("SELECT * FROM devices WHERE id=?", (_cursor.lastrowid, )).fetchone())

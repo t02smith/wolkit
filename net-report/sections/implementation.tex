@@ -1,0 +1,34 @@
+
+\section{Implementation}
+
+\subsection{API}
+
+The API was written using FastAPI~\cite{}. One main advantage to this was that FastAPI generates and hosts OpenAPI documentation; this means users can easily explore and interact with the API.
+\x
+The API will be secured using OAuth2 and JWT tokens, where users will have to enter a username and password before being able to view any data or make any changes.
+
+\subsection{Data Storage}
+
+This application will create a local SQLite database consisting of the following tables:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{devices} Information about the devices that helps us identify them. This includes their MAC address, static IP address, a user-provided alias, and whether or not they can be woken with a magic packet.
+  \item \textbf{devices\_to\_search\_for} This will store information about devices that we are searching for through various protocols. Each record references a device from the \textbf{devices} table and whether or not they should be searched for through various mediums (such as Bluetooth or in the LAN).
+  \item \textbf{schedules} This will detail the recurring days of the week that a device should be woken up.
+  \item \textbf{services} This includes details about all the background processes that will be run. For example, whether the application should search for Bluetooth devices.
+  \item \textbf{users} Stores information about the users of the system, where a single user will be an admin.
+\end{itemize}
+
+\subsection{Other Details}
+
+\subsubsection{Environment Sensing}
+
+For this project, the Enviro sensor for Raspberry Pi~\cite{} was used. This allowed me to trigger events when the following metrics were above and below given thresholds:
+
+\vspace{-2mm}
+\begin{itemize}[noitemsep]
+  \item the current room temperature,
+  \item the light level,
+  \item nearby noise, and
+  \item motion.
+\end{itemize}

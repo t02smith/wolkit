@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 import logging as log
 from lib.schedule import schedule_watcher
-from net.sniffer import listen_for_packets
-from net.wireless import watch_LAN
-from net.bluetooth import watch_bluetooth
+from services.sniffer import listen_for_packets
+from services.wireless import watch_LAN
+from services.bluetooth import watch_bluetooth
 import asyncio
 
 
@@ -22,7 +22,8 @@ services = {
     "scheduler": ("Schedules days and times each week to wake a device.", 1, schedule_watcher),
     "sniffer": ("Listens for packets being sent to a target computer and will wake the device if need be.", 0, listen_for_packets),
     "lan": ("Wakes a target device based upon whether a given other device is present in the network", 0, watch_LAN),
-    "bluetooth": ("Listen for nearby bluetooth devices to trigger device wakes.", 1, watch_bluetooth)
+    "bluetooth": ("Listen for nearby bluetooth devices to trigger device wakes.", 1, watch_bluetooth),
+    "git": ("Watch git repositories for changes", 1, None)
 }
 
 def enable_all_services():

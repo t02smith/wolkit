@@ -1,0 +1,4 @@
+
+
+class GitRepositoryAlreadyTracker(ValueError):
+    pass
