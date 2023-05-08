@@ -18,7 +18,7 @@ class WatcherDevice(Base):
     timeout_minutes = Column(Integer, nullable=False)
     last_checked = Column(Integer, nullable=True)
 
-    wakes = relationship("WakeableDevice", back_populates="waked_by", secondary="watchers_mapping")
+    wakes = relationship("WakeableDevice", back_populates="waked_by", secondary="watchers_mapping", lazy=True)
 
     def in_timeout(self) -> bool:
         if self.last_checked is None:

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -8,6 +10,16 @@ class WakeableDeviceBase(BaseModel):
 
 
 class WakeableDeviceCreate(WakeableDeviceBase):
+    pass
+
+
+class WakeableDevicePatch(BaseModel):
+    alias: Optional[str] = None
+    mac_addr: Optional[str] = None
+    ip_addr: Optional[str] = None
+
+
+class WakeableDeviceUpdate(WakeableDeviceBase):
     pass
 
 

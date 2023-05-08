@@ -1,3 +1,5 @@
+from sqlalchemy.orm import Session
+
 import services.wireless.queries as wat_db
 import datetime
 import bluetooth
@@ -5,12 +7,12 @@ import logging as log
 import asyncio
 
 
-async def watch_bluetooth():
+async def watch_bluetooth(db: Session):
     """
     Watch for bluetooth devices available
     :return:
     """
-    watchers = list(filter(lambda d: d.bluetooth, wat_db.get_all_watchers()))
+    watchers = list(filter(lambda d: d.bluetooth, wat_db.get_all_watchers(db)))
     if len(watchers) == 0:
         log.debug("No devices to watch => terminating")
         return

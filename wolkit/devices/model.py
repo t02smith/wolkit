@@ -29,9 +29,11 @@ class WakeableDevice(Base):
     # static ip address for the device
     ip_addr = Column(String, unique=True, index=False)
 
+    status = Column(Integer, nullable=False, default=2)
+
     #
-    schedules = relationship("Schedule", back_populates="device")
-    waked_by = relationship("WatcherDevice", back_populates="wakes", secondary="watchers_mapping")
+    schedules = relationship("Schedule", back_populates="device", lazy=True)
+    waked_by = relationship("WatcherDevice", back_populates="wakes", secondary="watchers_mapping", lazy=True)
 
     def wake(self) -> None:
         """

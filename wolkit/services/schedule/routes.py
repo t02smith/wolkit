@@ -55,7 +55,7 @@ async def create_schedule(device_id: int, schedule: ScheduleCreate, user: User =
 )
 async def pause_schedule(device_id: int, schedule_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     schedule_db.set_schedule_active(device_id, schedule_id, False, db)
-    return GenericResponse(f"Schedule {schedule_id} for device {device_id} set to enabled")
+    return GenericResponse(message=f"Schedule {schedule_id} for device {device_id} set to enabled")
 
 
 @schedules_router.put(
@@ -68,7 +68,7 @@ async def pause_schedule(device_id: int, schedule_id: int, user: User = Depends(
 )
 async def enable_schedule(device_id: int, schedule_id: int, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     schedule_db.set_schedule_active(device_id, schedule_id, True, db)
-    return GenericResponse(f"Schedule {schedule_id} for device {device_id} set to disabled")
+    return GenericResponse(message=f"Schedule {schedule_id} for device {device_id} set to disabled")
 
 
 @schedules_router.delete(

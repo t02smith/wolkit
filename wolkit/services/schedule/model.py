@@ -13,7 +13,7 @@ class Schedule(Base):
     id = Column(Integer, primary_key=True, index=True)
 
     device_id = Column(Integer, ForeignKey("devices.id"))
-    device = relationship("WakeableDevice", back_populates="schedules")
+    device = relationship("WakeableDevice", back_populates="schedules", lazy=True)
 
     weekday = Column(Integer, nullable=False, index=False)
     hour = Column(Integer, nullable=False, index=False)

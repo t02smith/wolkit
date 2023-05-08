@@ -2,14 +2,13 @@ from pydantic import BaseModel
 import logging as log
 
 from sqlalchemy.orm import Session, sessionmaker
-
 from services.schedule.model import schedule_service
 from services.wireless.sniffer import listen_for_packets
 from services.wireless.lan import watch_LAN
 from services.wireless.bluetooth import watch_bluetooth
 import asyncio
-from db.connection import Base, get_db
-from sqlalchemy import Column, Integer, String, event
+from db.connection import Base
+from sqlalchemy import Column, Integer, String, event, Boolean
 
 
 class Service(Base):
@@ -22,7 +21,7 @@ class Service(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, nullable=False)
     description = Column(String, nullable=False)
-    active = Column(Integer, nullable=False)
+    active = Column(Boolean, nullable=False)
 
 
 running_services = {}
@@ -30,14 +29,14 @@ services = {
     "scheduler": {
         "obj": Service(name="scheduler", description="Schedules days and times each week to wake a device.", active=1),
         "method": schedule_service},
-    "sniffer": {"obj": Service(name="sniffer",
-                               description="Listens for packets being sent to a target computer and will wake the "
-                                           "device if need be.",
-                               active=0), "method": listen_for_packets},
+    # "sniffer": {"obj": Service(name="sniffer",
+    #                            description="Listens for packets being sent to a target computer and will wake the "
+    #                                        "device if need be.",
+    #                            active=0), "method": listen_for_packets},
     "lan": {"obj": Service(name="lan",
                            description="Listens for packets being sent to a target computer and will wake the device "
                                        "if need be.",
-                           active=0), "method": listen_for_packets},
+                           active=0), "method": watch_LAN},
     "bluetooth": {
         "obj": Service(name="bluetooth", description="Listen for nearby bluetooth devices to trigger device wakes.",
                        active=1), "method": watch_bluetooth},
@@ -56,12 +55,13 @@ def insert_default_service_records(target, connection, **kwargs):
 event.listen(Service.__table__, "after_create", insert_default_service_records)
 
 
-def enable_all_services():
+def enable_all_services(db: Session):
+
     for s in services:
         if s not in running_services:
             continue
 
-        enable_service(s)
+        enable_service(s, db)
 
 
 def disable_all_services():
@@ -72,7 +72,7 @@ def disable_all_services():
         disable_service(s)
 
 
-def enable_service(service_name: str) -> None:
+def enable_service(service_name: str, db: Session) -> None:
     """
     Enable a service that is currently disabled
     :param service_name: the name of the service
@@ -87,7 +87,7 @@ def enable_service(service_name: str) -> None:
         return
 
     log.info(f"enabling service {service_name}")
-    running_services[service_name] = asyncio.get_event_loop().create_task(services[service_name][2]())
+    running_services[service_name] = asyncio.get_event_loop().create_task(services[service_name]["method"](db))
 
 
 def disable_service(service_name: str) -> None:

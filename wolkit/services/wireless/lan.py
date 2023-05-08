@@ -1,16 +1,19 @@
 import datetime
+
+from sqlalchemy.orm import Session
+
 from devices.model import is_active
 import services.wireless.queries as wat_db
 import logging as log
 import asyncio
 
 
-async def watch_LAN():
+async def watch_LAN(db: Session):
     """
     Watch the LAN for registered devices appearing
     :return: None
     """
-    watchers = list(filter(lambda d: d.wireless, wat_db.get_all_watchers()))
+    watchers = list(filter(lambda d: d.wireless, wat_db.get_all_watchers(db)))
     if len(watchers) == 0:
         log.debug("No devices to watch => terminating")
         return

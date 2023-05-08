@@ -6,7 +6,7 @@ from auth.model import User
 from db.connection import get_db
 from services.schedule.routes import schedules_router
 from typing import List
-from devices.schema import WakeableDeviceCreate
+from devices.schema import *
 from devices.model import WakeableDevice as WakeableDeviceModel
 import devices.queries as dev_db
 from pydantic import BaseModel
@@ -79,3 +79,30 @@ async def wake_device(device: WakeableDeviceModel = Depends(dev_db.get_device_by
 )
 async def delete_device(device: WakeableDeviceModel = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     dev_db.delete_device(device.id, db)
+
+
+@devices_router.patch(
+    "/{device_id}",
+    status_code=200,
+    name="Patch a device",
+    description="Change the attributes of an existing device by submitting only the attributes that you want to change.",
+    summary="Update attributes for a device",
+    tags=["Device Management"],
+    response_model=WakeableDevice
+)
+async def patch_device(device_id: int, update: WakeableDevicePatch, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return dev_db.patch_device(device_id, update, db)
+
+
+@devices_router.put(
+    "/{device_id}",
+    status_code=200,
+    name="Update a device",
+    description="Change the attributes of an existing device by submitting all attributes including those that aren't "
+                "being changed.",
+    response_model=WakeableDevice,
+    summary="Update attributes for a device",
+    tags=["Device Management"]
+)
+async def update_device(device_id: int, update: WakeableDevicePatch, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return dev_db.update_device(device_id, update, db)

@@ -3,9 +3,11 @@ from sqlalchemy.orm import Session
 from db.connection import get_db
 from typing import List, Union
 from devices.model import WakeableDevice as WakeableDeviceModel
-from devices.schema import WakeableDevice, WakeableDeviceCreate
+from devices.schema import *
 import devices.err as err_dev
 from fastapi import Depends
+from services.schedule.model import Schedule
+from services.wireless.model import WatcherDeviceMapping
 
 
 # Select statements
@@ -54,11 +56,41 @@ def delete_device(device_id: int, db: Session):
     Delete a device from the database.
     This will include any records from the watchers or scheduling tables that reference it
     """
+    db.query(Schedule).filter(Schedule.device_id == device_id).delete()
+    db.query(WatcherDeviceMapping).filter(WatcherDeviceMapping.wake_device_id == device_id).delete()
     db.query(WakeableDeviceModel).filter(WakeableDeviceModel.id == device_id).delete()
 
     db.commit()
 
-    # db_cursor.execute("DELETE FROM watchers_mapping WHERE wake_device_id=?", [device_id])
-    # db_cursor.execute("DELETE FROM schedules WHERE device_id=?", [device_id])
-    # db_cursor.execute("DELETE FROM devices WHERE id=?", [device_id])
-    # db_con.commit()
+
+def patch_device(device_id: int, update: WakeableDevicePatch, db: Session):
+    d: WakeableDeviceModel = db.query(WakeableDeviceModel).filter(WakeableDeviceModel.id == device_id).first()
+    if not d:
+        raise err_dev.DeviceNotFoundError(device_id)
+
+    if update.alias is not None:
+        d.alias = update.alias
+
+    if update.ip_addr is not None:
+        d.ip_addr = update.ip_addr
+
+    if update.mac_addr is not None:
+        d.mac_addr = update.mac_addr
+
+    db.commit()
+    db.refresh(d)
+    return d
+
+
+def update_device(device_id: int, update: WakeableDevicePatch, db: Session):
+    d: WakeableDeviceModel = db.query(WakeableDeviceModel).filter(WakeableDeviceModel.id == device_id).first()
+    if not d:
+        raise err_dev.DeviceNotFoundError(device_id)
+
+    d.alias = update.alias
+    d.ip_addr = update.ip_addr
+    d.mac_addr = update.mac_addr
+
+    db.commit()
+    db.refresh(d)
+    return d
