@@ -37,7 +37,6 @@ def get_user_by_token(token: str = Depends(oauth2)) -> User:
         if username is None:
             raise auth_err.InvalidTokenError("Invalid token given")
 
-        token_data = TokenData(username=username)
     except JWTError:
         raise auth_err.InvalidTokenError("Invalid token given")
 

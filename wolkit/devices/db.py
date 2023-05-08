@@ -36,21 +36,12 @@ def get_all_devices() -> List[WakeableDevice]:
     return [device_tuple_factory(d) for d in db_cursor.execute("SELECT * FROM devices;").fetchall()]
 
 
-def find_device_by_alias(alias: str) -> Union[WakeableDevice, None]:
-    """
-    Find a device by its alias and return it
-    :param alias: the alias to search for
-    :return: the device if it exists or none
-    """
-    result = db_cursor.execute(
-        "SELECT * FROM devices WHERE alias=?;",
-        [alias]
-    ).fetchone()
+def get_device_by_id(device_id: int) -> WakeableDevice:
+    res = db_cursor.execute("SELECT * FROM devices WHERE id=?", [device_id]).fetchone()
+    if res is None:
+        raise err_dev.DeviceNotFoundError(device_id)
 
-    if len(result) == 0:
-        return None
-
-    return device_tuple_factory(result)
+    return device_tuple_factory(res)
 
 
 # Insert statements
@@ -66,3 +57,9 @@ def new_device(device: WakeableDevice) -> WakeableDevice:
     except sqlite3.IntegrityError as e:
         raise err_dev.DeviceDetailsAlreadyUsed(e.args[0])
 
+
+def delete_device(device_id: int):
+    db_cursor.execute("DELETE FROM watchers_mapping WHERE wake_device_id=?", [device_id])
+    db_cursor.execute("DELETE FROM schedules WHERE device_id=?", [device_id])
+    db_cursor.execute("DELETE FROM devices WHERE id=?", [device_id])
+    db_con.commit()

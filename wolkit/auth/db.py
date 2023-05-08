@@ -13,6 +13,7 @@ def user_tuple_factory(u):
         "admin": u[3] == 1
     })
 
+
 def create_users_table():
     db_cursor.execute("""CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY,
@@ -42,3 +43,8 @@ def get_all_users() -> List[User]:
 def get_user_by_username(username: str) -> Union[User, None]:
     res = db_cursor.execute("SELECT * FROM users WHERE username=?", [username]).fetchone()
     return None if res is None else user_tuple_factory(res)
+
+
+def update_user_password(user_id: int, password: str):
+    db_cursor.execute("UPDATE users SET password=? WHERE id=?", (pwd_context.hash(password), user_id))
+    db_con.commit()

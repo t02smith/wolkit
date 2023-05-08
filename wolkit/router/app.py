@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from router.router import router
+from db.connection import db_con
+from db.setup import setup_db
 from services.db import get_services
 from services.services import enable_service
 
@@ -35,12 +36,17 @@ app = FastAPI(
     ],
     debug=True
 )
-app.include_router(router)
 
 
 @app.on_event("startup")
 async def start_services():
+    setup_db()
     services = get_services()
     for s in services:
         if s.active:
             enable_service(s.name)
+
+@app.on_event("shutdown")
+async def on_close():
+    db_con.commit()
+    db_con.close()

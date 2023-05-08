@@ -11,3 +11,5 @@ class InvalidUserCredentials(ValueError):
     pass
 
 
+class DuplicatePasswordError(ValueError):
+    pass

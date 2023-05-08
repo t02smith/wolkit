@@ -13,6 +13,7 @@ class Schedule(BaseModel):
     weekday: int
     hour: int
     minute: int
+    active: bool
 
 
 # schedule listener

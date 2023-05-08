@@ -30,6 +30,18 @@ async def get_all_devices(user: User = Depends(get_current_user)) -> List[Wakeab
     return dev_db.get_all_devices()
 
 
+@devices_router.get(
+    "/{device_id}",
+    status_code=200,
+    name="Get a device",
+    description="Get an existing device using its unique ID",
+    summary="Get an existing device",
+    tags=["Device Management"]
+)
+async def delete_device(device: WakeableDevice = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
+    return device
+
+
 @devices_router.post(
     "/",
     status_code=201,
@@ -47,7 +59,7 @@ async def create_new_device(device: WakeableDeviceRequest, user: User = Depends(
 
 
 @devices_router.post(
-    "/wake",
+    "/{device_id}/wake",
     status_code=204,
     name="Wake a Device",
     description="Sends a magic packet over LAN to wake your device up from sleep mode. Remember your device will take "
@@ -55,9 +67,17 @@ async def create_new_device(device: WakeableDeviceRequest, user: User = Depends(
     summary="Wake up one of your devices.",
     tags=["Device Management"]
 )
-async def wake_device(alias: str, user: User = Depends(get_current_user)):
-    device = dev_db.find_device_by_alias(alias)
-    if device is None:
-        raise HTTPException(status_code=404, detail=f"Device with alias '{alias}' not found.")
-
+async def wake_device(device: WakeableDevice = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
     device.wake()
+
+
+@devices_router.delete(
+    "/{device_id}",
+    status_code=204,
+    name="Delete a device",
+    description="Delete an existing device and any references to it",
+    summary="Delete an existing device",
+    tags=["Device Management"]
+)
+async def delete_device(device: WakeableDevice = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
+    dev_db.delete_device(device.id)
