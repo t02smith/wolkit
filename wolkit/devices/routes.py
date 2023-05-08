@@ -1,11 +1,12 @@
-from fastapi import APIRouter, HTTPException
-
-import wolkit.devices.errors
-from wolkit.services.schedule.routes import schedules_router
+from fastapi import APIRouter, HTTPException, Depends
+from auth.token import get_current_user
+from auth.user import User
+from services.schedule.routes import schedules_router
 from typing import List
-from wolkit.devices.device import WakeableDevice
-import wolkit.devices.db as dev_db
+from devices.device import WakeableDevice
+import devices.db as dev_db
 from pydantic import BaseModel
+
 
 devices_router = APIRouter(prefix="/devices")
 devices_router.include_router(schedules_router)
@@ -25,7 +26,7 @@ class WakeableDeviceRequest(BaseModel):
     response_model=List[WakeableDevice],
     summary="Returns a list of all recorded devices.",
     tags=["Device Management"])
-async def get_all_devices() -> List[WakeableDevice]:
+async def get_all_devices(user: User = Depends(get_current_user)) -> List[WakeableDevice]:
     return dev_db.get_all_devices()
 
 
@@ -37,15 +38,12 @@ async def get_all_devices() -> List[WakeableDevice]:
     response_model=WakeableDevice,
     summary="Record a new device.",
     tags=["Device Management"])
-async def create_new_device(device: WakeableDeviceRequest) -> WakeableDevice:
-    try :
-        return dev_db.new_device(WakeableDevice(**{
-            **device.__dict__,
-            "id": 0,
-            "status": 2
-        }))
-    except devices.errors.DeviceDetailsAlreadyUsed as e:
-        raise HTTPException(status_code=400, detail=e.args[0])
+async def create_new_device(device: WakeableDeviceRequest, user: User = Depends(get_current_user)) -> WakeableDevice:
+    return dev_db.new_device(WakeableDevice(**{
+        **device.__dict__,
+        "id": 0,
+        "status": 2
+    }))
 
 
 @devices_router.post(
@@ -57,7 +55,7 @@ async def create_new_device(device: WakeableDeviceRequest) -> WakeableDevice:
     summary="Wake up one of your devices.",
     tags=["Device Management"]
 )
-async def wake_device(alias: str):
+async def wake_device(alias: str, user: User = Depends(get_current_user)):
     device = dev_db.find_device_by_alias(alias)
     if device is None:
         raise HTTPException(status_code=404, detail=f"Device with alias '{alias}' not found.")

@@ -1,7 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from typing import List
 import services.wireless.db as wat_db
+from auth.token import get_current_user
+from auth.user import User
 from services.wireless.watcher import WatcherDevice
 
 watchers_router = APIRouter(prefix="/watchers")
@@ -41,7 +43,7 @@ def _watcher_to_watcher_respond(watcher: WatcherDevice) -> WatcherResponse:
     tags=["Watcher"],
     name="Get all Watchers"
 )
-def get_all_watchers():
+def get_all_watchers(user: User = Depends(get_current_user)):
     return list(map(
         lambda w: _watcher_to_watcher_respond(w),
         wat_db.get_all_watchers()))
@@ -55,12 +57,8 @@ def get_all_watchers():
     tags=["Watcher"],
     name="Get Watcher by ID"
 )
-def get_watcher(watcher_id: int):
-    res = wat_db.get_watcher_by_id(watcher_id)
-    if res is None:
-        raise HTTPException(status_code=404, detail=f"Watcher with id {watcher_id} not found")
-
-    return res
+def get_watcher(watcher_id: int, user: User = Depends(get_current_user)):
+    return wat_db.get_watcher_by_id(watcher_id)
 
 
 @watchers_router.post(
@@ -71,7 +69,7 @@ def get_watcher(watcher_id: int):
     tags=["Watcher"],
     name="Create a new watcher"
 )
-def new_watcher(watcher: WatcherRequest):
+def new_watcher(watcher: WatcherRequest, user: User = Depends(get_current_user)):
     return wat_db.create_watcher(WatcherDevice(**{
         **watcher.__dict__,
         "devices": []

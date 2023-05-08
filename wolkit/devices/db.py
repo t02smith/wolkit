@@ -1,9 +1,9 @@
 import sqlite3
 
-from wolkit.db.con import db_cursor, db_con
+from db.connection import db_cursor, db_con
 from typing import List, Union
-from wolkit.devices.device import WakeableDevice
-import wolkit.devices.errors as err_dev
+from devices.device import WakeableDevice
+import devices.err as err_dev
 
 # Utility
 

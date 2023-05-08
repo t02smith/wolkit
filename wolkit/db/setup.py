@@ -1,3 +1,4 @@
+from auth.db import create_users_table
 from devices.db import create_devices_table
 from services.schedule.db import create_schedules_table
 from services.wireless.db import create_watchers_table, create_watchers_mapping_table
@@ -13,5 +14,6 @@ def setup_db():
     create_watchers_table()
     create_watchers_mapping_table()
     create_services_table()
+    create_users_table()
     log.info("db set up successfully")
     db_con.commit()

@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
-from wolkit.auth.routes import auth_router
-from wolkit.devices.routes import devices_router
-from wolkit.services.routes import services_router
-from wolkit.services.wireless.routes import watchers_router
+from auth.routes import auth_router
+from devices.routes import devices_router
+from services.routes import services_router
+from services.wireless.routes import watchers_router
 
 router = APIRouter(prefix="/api/v1")
 router.include_router(devices_router)

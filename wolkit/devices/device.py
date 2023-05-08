@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from wolkit.net.wol import send_magic_packet
+from net.wol import send_magic_packet
 from scapy.layers.inet import *
 from enum import Enum
 from datetime import datetime

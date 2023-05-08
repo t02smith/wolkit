@@ -1,4 +1,5 @@
 from db.connection import db_cursor, db_con
+from services.wireless.err import WatcherNotFoundError
 from services.wireless.watcher import WatcherDevice
 from devices.db import device_tuple_factory
 
@@ -76,7 +77,7 @@ def get_all_watchers():
 def get_watcher_by_id(watcher_id: int):
     wd = db_cursor.execute("SELECT * FROM watchers WHERE id=?", (watcher_id,)).fetchone()
     if wd is None:
-        return None
+        raise WatcherNotFoundError(watcher_id)
 
     return _watcher_tuple_factory(wd)
 

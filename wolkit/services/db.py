@@ -1,5 +1,5 @@
-from wolkit.db.con import db_cursor, db_con
-from wolkit.services.services import Service, services
+from db.connection import db_cursor, db_con
+from services.services import Service, services
 
 
 def create_services_table():

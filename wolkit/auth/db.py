@@ -1,7 +1,7 @@
-from wolkit.auth.oauth import pwd_context
-from wolkit.db.con import db_con, db_cursor
+from auth.oauth import pwd_context
+from db.connection import db_con, db_cursor
 from typing import List
-from wolkit.auth.user import User
+from auth.user import User
 from typing import Union
 
 
@@ -21,7 +21,10 @@ def create_users_table():
         admin INTEGER NOT NULL
     )""")
 
-    create_new_user("admin", "admin", True)
+    db_cursor.execute(
+        "INSERT OR IGNORE INTO users (username, password, admin) VALUES (?, ?, ?)",
+        ("admin", pwd_context.hash("admin"), 1)
+    )
 
 
 def create_new_user(username: str, password: str, admin: bool = False):

@@ -1,7 +1,7 @@
 import datetime
 from pydantic import BaseModel
-from wolkit.devices.device import WakeableDevice
-from wolkit.services.schedule import db as schedule_db
+from devices.device import WakeableDevice
+from services.schedule import db as schedule_db
 import asyncio
 import logging as log
 from typing import Union

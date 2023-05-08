@@ -1,7 +1,7 @@
-from wolkit.db.con import db_cursor, db_con
+from db.connection import db_cursor, db_con
 from typing import List
-from wolkit.services.schedule.schedule import Schedule
-from wolkit.devices.device import WakeableDevice
+from services.schedule.schedule import Schedule
+from devices.device import WakeableDevice
 
 
 # Utility

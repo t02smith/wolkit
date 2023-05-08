@@ -4,6 +4,7 @@ import services.wireless.db as wat_db
 import logging as log
 import asyncio
 
+
 async def watch_LAN():
     """
     Watch the LAN for registered devices appearing

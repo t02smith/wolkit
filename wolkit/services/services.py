@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 import logging as log
-from wolkit.services.schedule.schedule import schedule_service
-from wolkit.services.wireless.sniffer import listen_for_packets
-from wolkit.services.wireless.lan import watch_LAN
-from wolkit.services.wireless.bluetooth import watch_bluetooth
+from services.schedule.schedule import schedule_service
+from services.wireless.sniffer import listen_for_packets
+from services.wireless.lan import watch_LAN
+from services.wireless.bluetooth import watch_bluetooth
 import asyncio
 
 

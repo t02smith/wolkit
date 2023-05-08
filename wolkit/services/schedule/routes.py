@@ -1,7 +1,10 @@
-from fastapi import APIRouter
-from wolkit.services.schedule import db as schedule_db
+from fastapi import APIRouter, Depends
+
+from auth.token import get_current_user
+from auth.user import User
+from services.schedule import db as schedule_db
 from pydantic import BaseModel
-from wolkit.services.schedule.schedule import Schedule
+from services.schedule.schedule import Schedule
 from typing import List
 
 schedules_router = APIRouter(prefix="/{device_id}/schedule")
@@ -25,7 +28,7 @@ class ScheduleRequest(BaseModel):
     response_model=List[Schedule],
     name="Get Schedules by Device",
     tags=["Scheduler"])
-async def get_all_schedules_for_device(device_id: int) -> List[Schedule]:
+async def get_all_schedules_for_device(device_id: int, user: User = Depends(get_current_user)) -> List[Schedule]:
     return schedule_db.get_schedules_for_device(device_id)
 
 
@@ -37,7 +40,7 @@ async def get_all_schedules_for_device(device_id: int) -> List[Schedule]:
     name="Create a scheduled wake-up",
     tags=["Scheduler"]
 )
-async def create_schedule(schedule: ScheduleRequest) -> Schedule:
+async def create_schedule(schedule: ScheduleRequest, user: User = Depends(get_current_user)) -> Schedule:
     s = Schedule(**{**schedule.__dict__, "id": -1})
     schedule_db.create_new_schedule(s)
-    return schedule
+    return s
