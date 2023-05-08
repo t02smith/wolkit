@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
 
 from auth.oauth import pwd_context
-from db.connection import db_con, db_cursor
 from auth.model import User as UserModel
 
 

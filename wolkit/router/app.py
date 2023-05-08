@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+
 from db.connection import *
+from db.setup import setup_db
 
 with open("static/description.md", "r") as f:
     description = f.read()
@@ -41,15 +44,9 @@ app = FastAPI(
 
 
 @app.on_event("startup")
-async def start_services():
-    return
-    # setup_db()
+async def start_services(db: Session = Depends(get_db)):
+    setup_db(db)
     # services = get_services()
     # for s in services:
     #     if s.active:
     #         enable_service(s.name)
-
-@app.on_event("shutdown")
-async def on_close():
-    db_con.commit()
-    db_con.close()

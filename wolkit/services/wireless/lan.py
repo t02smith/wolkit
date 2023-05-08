@@ -1,6 +1,6 @@
 import datetime
 from devices.model import is_active
-import services.wireless.db as wat_db
+import services.wireless.queries as wat_db
 import logging as log
 import asyncio
 

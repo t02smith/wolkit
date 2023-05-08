@@ -1,29 +1,60 @@
 from pydantic import BaseModel
 import logging as log
-from services.schedule.schedule import schedule_service
+
+from sqlalchemy.orm import Session, sessionmaker
+
+from services.schedule.model import schedule_service
 from services.wireless.sniffer import listen_for_packets
 from services.wireless.lan import watch_LAN
 from services.wireless.bluetooth import watch_bluetooth
 import asyncio
+from db.connection import Base, get_db
+from sqlalchemy import Column, Integer, String, event
 
 
-class Service(BaseModel):
+class Service(Base):
     """
     A service is a background task that will allow us to wake a device based
     upon a given condition.
     """
-    name: str
-    description: str
-    active: bool
+    __tablename__ = "services"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, nullable=False)
+    description = Column(String, nullable=False)
+    active = Column(Integer, nullable=False)
 
 
 running_services = {}
 services = {
-    "scheduler": ("Schedules days and times each week to wake a device.", 1, schedule_service),
-    "sniffer": ("Listens for packets being sent to a target computer and will wake the device if need be.", 0, listen_for_packets),
-    "lan": ("Wakes a target device based upon whether a given other device is present in the network", 0, watch_LAN),
-    "bluetooth": ("Listen for nearby bluetooth devices to trigger device wakes.", 1, watch_bluetooth)
+    "scheduler": {
+        "obj": Service(name="scheduler", description="Schedules days and times each week to wake a device.", active=1),
+        "method": schedule_service},
+    "sniffer": {"obj": Service(name="sniffer",
+                               description="Listens for packets being sent to a target computer and will wake the "
+                                           "device if need be.",
+                               active=0), "method": listen_for_packets},
+    "lan": {"obj": Service(name="lan",
+                           description="Listens for packets being sent to a target computer and will wake the device "
+                                       "if need be.",
+                           active=0), "method": listen_for_packets},
+    "bluetooth": {
+        "obj": Service(name="bluetooth", description="Listen for nearby bluetooth devices to trigger device wakes.",
+                       active=1), "method": watch_bluetooth},
 }
+
+
+def insert_default_service_records(target, connection, **kwargs):
+    ses = sessionmaker(bind=connection)
+    db = ses()
+
+    for s, data in services.items():
+        db.add(data["obj"])
+    db.commit()
+
+
+event.listen(Service.__table__, "after_create", insert_default_service_records)
+
 
 def enable_all_services():
     for s in services:
@@ -77,4 +108,3 @@ def disable_service(service_name: str) -> None:
     task = running_services[service_name]
     task.cancel()
     del (running_services[service_name])
-

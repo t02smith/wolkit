@@ -1,6 +1,6 @@
 import sqlite3
 from sqlalchemy.orm import Session
-from db.connection import db_cursor, db_con, get_db
+from db.connection import get_db
 from typing import List, Union
 from devices.model import WakeableDevice as WakeableDeviceModel
 from devices.schema import WakeableDevice, WakeableDeviceCreate

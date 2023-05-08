@@ -1,10 +1,12 @@
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
 
 from auth.token import get_current_user
 from auth.model import User
-from services import db as ser_db
+from db.connection import get_db
+from services import queries as ser_db
 from typing import List
-import services.services as services
+import services.model as services
 
 services_router = APIRouter(prefix="/services")
 
@@ -13,11 +15,10 @@ services_router = APIRouter(prefix="/services")
     "/",
     status_code=200,
     tags=["Services"],
-    response_model=List[services.Service],
     description="Returns the list of services, a brief description and whether they're active"
 )
-async def get_service_info(user: User = Depends(get_current_user)):
-    return ser_db.get_services()
+async def get_service_info(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return ser_db.get_all_services(db)
 
 
 @services_router.post(
@@ -25,9 +26,9 @@ async def get_service_info(user: User = Depends(get_current_user)):
     status_code=201,
     tags=["Services"]
 )
-async def enable_service(service_name: str, user: User = Depends(get_current_user)):
+async def enable_service(service_name: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
-        ser_db.set_service(service_name, True)
+        ser_db.set_service(service_name, True, db)
         services.enable_service(service_name)
         return {
             "message": f"Service {service_name} enabled"
@@ -41,8 +42,8 @@ async def enable_service(service_name: str, user: User = Depends(get_current_use
     status_code=201,
     tags=["Services"]
 )
-async def enable_all_services(user: User = Depends(get_current_user)):
-    ser_db.set_all_services(True)
+async def enable_all_services(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    ser_db.set_all_services(True, db)
     services.enable_all_services()
     return {
         "message": f"All services enabled"
@@ -54,9 +55,9 @@ async def enable_all_services(user: User = Depends(get_current_user)):
     status_code=201,
     tags=["Services"]
 )
-async def disable_service(service_name: str, user: User = Depends(get_current_user)):
+async def disable_service(service_name: str, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
-        ser_db.set_service(service_name, False)
+        ser_db.set_service(service_name, False, db)
         services.disable_service(service_name)
         return {
             "message": f"Service {service_name} enabled"
@@ -70,8 +71,8 @@ async def disable_service(service_name: str, user: User = Depends(get_current_us
     status_code=201,
     tags=["Services"]
 )
-async def disable_all_services(user: User = Depends(get_current_user)):
-    ser_db.set_all_services(False)
+async def disable_all_services(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    ser_db.set_all_services(False, db)
     services.disable_all_services()
     return {
         "message": f"All services disabled"

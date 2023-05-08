@@ -1,8 +1,6 @@
-from pydantic import BaseModel
 from net.wol import send_magic_packet
 from scapy.layers.inet import *
 from enum import Enum
-from datetime import datetime
 from db.connection import Base
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
@@ -30,6 +28,10 @@ class WakeableDevice(Base):
 
     # static ip address for the device
     ip_addr = Column(String, unique=True, index=False)
+
+    #
+    schedules = relationship("Schedule", back_populates="device")
+    waked_by = relationship("WatcherDevice", back_populates="wakes", secondary="watchers_mapping")
 
     def wake(self) -> None:
         """

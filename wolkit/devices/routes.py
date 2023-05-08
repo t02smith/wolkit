@@ -8,7 +8,7 @@ from services.schedule.routes import schedules_router
 from typing import List
 from devices.schema import WakeableDeviceCreate
 from devices.model import WakeableDevice as WakeableDeviceModel
-import devices.db as dev_db
+import devices.queries as dev_db
 from pydantic import BaseModel
 
 

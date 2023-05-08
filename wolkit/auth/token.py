@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from auth.oauth import *
 from auth.model import User
-import auth.db as auth_db
+import auth.queries as auth_db
 import auth.err as auth_err
 from db.connection import get_db
 

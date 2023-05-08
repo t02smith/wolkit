@@ -1,4 +1,4 @@
-import services.wireless.db as wat_db
+import services.wireless.queries as wat_db
 import datetime
 import bluetooth
 import logging as log
