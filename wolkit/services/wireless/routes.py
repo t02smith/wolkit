@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List
 import services.wireless.db as wat_db
 from auth.token import get_current_user
-from auth.user import User
+from auth.model import User
 from services.wireless.watcher import WatcherDevice
 
 watchers_router = APIRouter(prefix="/watchers")

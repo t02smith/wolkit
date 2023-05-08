@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from auth.token import get_current_user
-from auth.user import User
+from auth.model import User
 from services.schedule import db as schedule_db
 from pydantic import BaseModel
 from services.schedule.schedule import Schedule

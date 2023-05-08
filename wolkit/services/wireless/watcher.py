@@ -1,4 +1,4 @@
-from devices.device import WakeableDevice
+from devices.schema import WakeableDevice
 from typing import List, Union
 import datetime
 from pydantic import BaseModel

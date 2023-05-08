@@ -1,19 +1,11 @@
-from auth.db import create_users_table
-from devices.db import create_devices_table
-from services.schedule.db import create_schedules_table
-from services.wireless.db import create_watchers_table, create_watchers_mapping_table
-from services.db import create_services_table
+from sqlalchemy.orm import Session
 import logging as log
-from db.connection import db_con
+from db.connection import db_con, Base, engine
 
+Base.metadata.create_all(bind=engine)
 
-def setup_db():
+def setup_db(db: Session):
     log.info("setting up db")
-    create_devices_table()
-    create_schedules_table()
-    create_watchers_table()
-    create_watchers_mapping_table()
-    create_services_table()
-    create_users_table()
+
     log.info("db set up successfully")
-    db_con.commit()
+    # db_con.commit()

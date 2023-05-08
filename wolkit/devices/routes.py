@@ -1,9 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
+
 from auth.token import get_current_user
-from auth.user import User
+from auth.model import User
+from db.connection import get_db
 from services.schedule.routes import schedules_router
 from typing import List
-from devices.device import WakeableDevice
+from devices.schema import WakeableDeviceCreate
+from devices.model import WakeableDevice as WakeableDeviceModel
 import devices.db as dev_db
 from pydantic import BaseModel
 
@@ -23,11 +27,10 @@ class WakeableDeviceRequest(BaseModel):
     status_code=200,
     name="Get All Devices",
     description="Get a list of all your recorded devices. These devices can be woken up by this API.",
-    response_model=List[WakeableDevice],
     summary="Returns a list of all recorded devices.",
     tags=["Device Management"])
-async def get_all_devices(user: User = Depends(get_current_user)) -> List[WakeableDevice]:
-    return dev_db.get_all_devices()
+async def get_all_devices(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return dev_db.get_all_devices(db)
 
 
 @devices_router.get(
@@ -38,7 +41,7 @@ async def get_all_devices(user: User = Depends(get_current_user)) -> List[Wakeab
     summary="Get an existing device",
     tags=["Device Management"]
 )
-async def delete_device(device: WakeableDevice = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
+async def delete_device(device: WakeableDeviceModel = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
     return device
 
 
@@ -47,15 +50,10 @@ async def delete_device(device: WakeableDevice = Depends(dev_db.get_device_by_id
     status_code=201,
     name="Create a New Device",
     description="Create a new device to track and use within this API",
-    response_model=WakeableDevice,
     summary="Record a new device.",
     tags=["Device Management"])
-async def create_new_device(device: WakeableDeviceRequest, user: User = Depends(get_current_user)) -> WakeableDevice:
-    return dev_db.new_device(WakeableDevice(**{
-        **device.__dict__,
-        "id": 0,
-        "status": 2
-    }))
+async def create_new_device(device: WakeableDeviceCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    return dev_db.new_device(device, db)
 
 
 @devices_router.post(
@@ -67,7 +65,7 @@ async def create_new_device(device: WakeableDeviceRequest, user: User = Depends(
     summary="Wake up one of your devices.",
     tags=["Device Management"]
 )
-async def wake_device(device: WakeableDevice = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
+async def wake_device(device: WakeableDeviceModel = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
     device.wake()
 
 
@@ -79,5 +77,5 @@ async def wake_device(device: WakeableDevice = Depends(dev_db.get_device_by_id),
     summary="Delete an existing device",
     tags=["Device Management"]
 )
-async def delete_device(device: WakeableDevice = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
-    dev_db.delete_device(device.id)
+async def delete_device(device: WakeableDeviceModel = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    dev_db.delete_device(device.id, db)

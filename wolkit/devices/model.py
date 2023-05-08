@@ -3,6 +3,9 @@ from net.wol import send_magic_packet
 from scapy.layers.inet import *
 from enum import Enum
 from datetime import datetime
+from db.connection import Base
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 
 class WakeableDeviceStatus(Enum):
@@ -11,23 +14,22 @@ class WakeableDeviceStatus(Enum):
     UNKNOWN = 2
 
 
-class WakeableDevice(BaseModel):
+class WakeableDevice(Base):
     """
     Represents a device that can be woken up over the network
     """
-    id: int
+    __tablename__ = "devices"
+
+    id = Column(Integer, primary_key=True, index=True)
 
     # a nickname to make it more easily recognisable
-    alias: str
+    alias = Column(String, unique=True, index=False)
 
     # unique address for the device
-    mac_addr: str
+    mac_addr = Column(String, unique=True, index=True)
 
     # static ip address for the device
-    ip_addr: str
-
-    # whether the device is currently active
-    status: WakeableDeviceStatus = WakeableDeviceStatus.UNKNOWN
+    ip_addr = Column(String, unique=True, index=False)
 
     def wake(self) -> None:
         """

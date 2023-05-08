@@ -3,10 +3,13 @@ from typing import Union
 from datetime import timedelta, datetime
 from jose import jwt, JWTError
 from fastapi import Depends
+from sqlalchemy.orm import Session
+
 from auth.oauth import *
-from auth.user import User
+from auth.model import User
 import auth.db as auth_db
 import auth.err as auth_err
+from db.connection import get_db
 
 
 class Token(BaseModel):
@@ -30,7 +33,7 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-def get_user_by_token(token: str = Depends(oauth2)) -> User:
+def get_user_by_token(token: str = Depends(oauth2), db: Session = Depends(get_db)) -> User:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
         username = payload.get("sub")
@@ -40,14 +43,14 @@ def get_user_by_token(token: str = Depends(oauth2)) -> User:
     except JWTError:
         raise auth_err.InvalidTokenError("Invalid token given")
 
-    user = auth_db.get_user_by_username(username)
+    user = auth_db.get_user_by_username(username, db)
     if user is None:
         raise auth_err.UserNotFoundError(f"User with username {username} not found")
     return user
 
 
-def authenticate_user(username: str, password: str) -> User:
-    user = auth_db.get_user_by_username(username)
+def authenticate_user(username: str, password: str, db: Session) -> User:
+    user = auth_db.get_user_by_username(username, db)
     if user is None:
         raise auth_err.UserNotFoundError(f"User with username {username} not found")
 

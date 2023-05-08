@@ -1,15 +1,12 @@
 from fastapi import FastAPI
-from db.connection import db_con
-from db.setup import setup_db
-from services.db import get_services
-from services.services import enable_service
+from db.connection import *
+
+with open("static/description.md", "r") as f:
+    description = f.read()
 
 app = FastAPI(
     title="Wake-on-LAN Kit",
-    description="A toolkit for waking your LAN devices is various different ways. This includes: scanning your local "
-                "network, looking for nearby bluetooth devices, scheduling devices, and more. This project is being "
-                "submitted for the coursework for COMP3210 - Advanced Computer Networks at the University of "
-                "Southampton.",
+    description=description,
     version="0.1",
     contact={
         "name": "Tom Smith",
@@ -32,6 +29,11 @@ app = FastAPI(
         {
             "name": "Services",
             "description": "Enable or disable any background services, such as the Scheduler."
+        },
+        {
+            "name": "Users",
+            "description": "Relates to the users in the application. There will only be a singular admin user who has "
+                           "permission to do everything. It is recommended that they change their password immediately."
         }
     ],
     debug=True
@@ -40,11 +42,12 @@ app = FastAPI(
 
 @app.on_event("startup")
 async def start_services():
-    setup_db()
-    services = get_services()
-    for s in services:
-        if s.active:
-            enable_service(s.name)
+    return
+    # setup_db()
+    # services = get_services()
+    # for s in services:
+    #     if s.active:
+    #         enable_service(s.name)
 
 @app.on_event("shutdown")
 async def on_close():

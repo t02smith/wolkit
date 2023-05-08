@@ -2,7 +2,7 @@ from db.connection import db_cursor, db_con
 from typing import List
 from services.schedule.err import *
 from services.schedule.schedule import Schedule
-from devices.device import WakeableDevice
+from devices.model import WakeableDevice
 
 
 # Utility

@@ -1,6 +1,6 @@
 import datetime
 from pydantic import BaseModel
-from devices.device import WakeableDevice
+from devices.schema import WakeableDevice
 from services.schedule import db as schedule_db
 import asyncio
 import logging as log

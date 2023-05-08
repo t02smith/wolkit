@@ -1,7 +1,6 @@
 from db.connection import db_cursor, db_con
 from services.wireless.err import WatcherNotFoundError
 from services.wireless.watcher import WatcherDevice
-from devices.db import device_tuple_factory
 
 
 #
@@ -63,7 +62,7 @@ def get_all_watchers():
             "bluetooth": wd[3] == 1,
             "wireless": wd[4] == 1,
             "timeout_minutes": wd[5],
-            "wakes": [device_tuple_factory(d) for d in db_cursor.execute("""
+            "wakes": [(d) for d in db_cursor.execute("""
             SELECT * from devices 
             WHERE id in (
                 SELECT wake_device_id 

@@ -1,65 +1,64 @@
 import sqlite3
-
-from db.connection import db_cursor, db_con
+from sqlalchemy.orm import Session
+from db.connection import db_cursor, db_con, get_db
 from typing import List, Union
-from devices.device import WakeableDevice
+from devices.model import WakeableDevice as WakeableDeviceModel
+from devices.schema import WakeableDevice, WakeableDeviceCreate
 import devices.err as err_dev
-
-# Utility
-
-def device_tuple_factory(device) -> WakeableDevice:
-    return WakeableDevice(**{"id": device[0], "mac_addr": device[1], "alias": device[2], "ip_addr": device[3]})
-
-
-# DB functions
-
-def create_devices_table() -> None:
-    """
-    Create a new devices tables
-    :return: None
-    """
-    db_cursor.execute("""CREATE TABLE IF NOT EXISTS devices(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            mac_addr TEXT NOT NULL UNIQUE,
-            alias TEXT NOT NULL UNIQUE,
-            ip_addr TEXT
-        );""")
+from fastapi import Depends
 
 
 # Select statements
 
-def get_all_devices() -> List[WakeableDevice]:
+def get_all_devices(db: Session):
     """
     Returns a list of all devices recorded
     :return: list of recorded devices
     """
-    return [device_tuple_factory(d) for d in db_cursor.execute("SELECT * FROM devices;").fetchall()]
+    return db.query(WakeableDeviceModel).all()
 
 
-def get_device_by_id(device_id: int) -> WakeableDevice:
-    res = db_cursor.execute("SELECT * FROM devices WHERE id=?", [device_id]).fetchone()
-    if res is None:
+def get_device_by_id(device_id: int, db: Session = Depends(get_db)):
+    """
+    Get a wakeable device using its ID from the DB
+    """
+    d = db.query(WakeableDeviceModel).filter(WakeableDeviceModel.id == device_id).first()
+    if not d:
         raise err_dev.DeviceNotFoundError(device_id)
 
-    return device_tuple_factory(res)
+    return d
 
 
 # Insert statements
 
-def new_device(device: WakeableDevice) -> WakeableDevice:
-    try :
-        db_cursor.execute(
-            "INSERT INTO devices (mac_addr, alias, ip_addr) VALUES (?, ?, ?);",
-            (device.mac_addr.upper(), device.alias, device.ip_addr)
-        )
-        db_con.commit()
-        return device_tuple_factory(db_cursor.execute("SELECT * FROM devices WHERE id=?", (db_cursor.lastrowid,)).fetchone())
-    except sqlite3.IntegrityError as e:
-        raise err_dev.DeviceDetailsAlreadyUsed(e.args[0])
+def new_device(device: WakeableDeviceCreate, db: Session):
+    """
+    Create a new device and insert it into the database
+    If the alias or mac address has already been used then it will throw
+    an exception
+    """
+    d = WakeableDeviceModel(
+        alias=device.alias,
+        mac_addr=device.mac_addr,
+        ip_addr=device.ip_addr
+    )
+    db.add(d)
+    db.commit()
+    db.refresh(d)
+
+    return d
 
 
-def delete_device(device_id: int):
-    db_cursor.execute("DELETE FROM watchers_mapping WHERE wake_device_id=?", [device_id])
-    db_cursor.execute("DELETE FROM schedules WHERE device_id=?", [device_id])
-    db_cursor.execute("DELETE FROM devices WHERE id=?", [device_id])
-    db_con.commit()
+def delete_device(device_id: int, db: Session):
+    """
+    Delete a device from the database.
+    This will include any records from the watchers or scheduling tables that reference it
+    """
+    db.query(WakeableDeviceModel).filter(WakeableDeviceModel.id == device_id).delete()
+
+    db.commit()
+
+    # db_cursor.execute("DELETE FROM watchers_mapping WHERE wake_device_id=?", [device_id])
+    # db_cursor.execute("DELETE FROM schedules WHERE device_id=?", [device_id])
+    # db_cursor.execute("DELETE FROM devices WHERE id=?", [device_id])
+    # db_con.commit()

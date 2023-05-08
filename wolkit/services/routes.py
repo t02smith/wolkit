@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 
 from auth.token import get_current_user
-from auth.user import User
+from auth.model import User
 from services import db as ser_db
 from typing import List
 import services.services as services
@@ -66,11 +66,11 @@ async def disable_service(service_name: str, user: User = Depends(get_current_us
 
 
 @services_router.post(
-    "/all/disabled",
+    "/all/disable",
     status_code=201,
     tags=["Services"]
 )
-async def disabled_all_services(user: User = Depends(get_current_user)):
+async def disable_all_services(user: User = Depends(get_current_user)):
     ser_db.set_all_services(False)
     services.disable_all_services()
     return {
