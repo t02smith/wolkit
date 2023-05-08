@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 import logging as log
-from lib.schedule import schedule_watcher
-from services.sniffer import listen_for_packets
-from services.wireless import watch_LAN
-from services.bluetooth import watch_bluetooth
+from wolkit.services.schedule.schedule import schedule_service
+from wolkit.services.wireless.sniffer import listen_for_packets
+from wolkit.services.wireless.lan import watch_LAN
+from wolkit.services.wireless.bluetooth import watch_bluetooth
 import asyncio
 
 
@@ -19,11 +19,10 @@ class Service(BaseModel):
 
 running_services = {}
 services = {
-    "scheduler": ("Schedules days and times each week to wake a device.", 1, schedule_watcher),
+    "scheduler": ("Schedules days and times each week to wake a device.", 1, schedule_service),
     "sniffer": ("Listens for packets being sent to a target computer and will wake the device if need be.", 0, listen_for_packets),
     "lan": ("Wakes a target device based upon whether a given other device is present in the network", 0, watch_LAN),
-    "bluetooth": ("Listen for nearby bluetooth devices to trigger device wakes.", 1, watch_bluetooth),
-    "git": ("Watch git repositories for changes", 1, None)
+    "bluetooth": ("Listen for nearby bluetooth devices to trigger device wakes.", 1, watch_bluetooth)
 }
 
 def enable_all_services():

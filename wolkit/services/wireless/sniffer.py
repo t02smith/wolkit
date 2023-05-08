@@ -1,5 +1,5 @@
 from scapy.all import *
-import db.devices as dev_db
+import devices.db as dev_db
 import logging as log
 
 

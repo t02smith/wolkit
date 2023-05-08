@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
-import db.services as ser_db
+from wolkit.services import db as ser_db
 from typing import List
-import lib.services as services
+import wolkit.services.services as services
 
 services_router = APIRouter(prefix="/services")
 

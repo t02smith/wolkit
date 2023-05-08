@@ -1,8 +1,7 @@
-import time
 import datetime
 from pydantic import BaseModel
-from lib.devices import WakeableDevice
-import db.schedule as schedule_db
+from wolkit.devices.device import WakeableDevice
+from wolkit.services.schedule import db as schedule_db
 import asyncio
 import logging as log
 from typing import Union
@@ -18,7 +17,7 @@ class Schedule(BaseModel):
 
 # schedule listener
 
-async def schedule_watcher():
+async def schedule_service():
     log.info("Scheduler started")
     while True:
         timestamp = datetime.datetime.now()

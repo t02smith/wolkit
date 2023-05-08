@@ -1,7 +1,6 @@
 import datetime
-import time
-from lib.devices import is_active
-import db.watchers as wat_db
+from devices.device import is_active
+import services.wireless.db as wat_db
 import logging as log
 import asyncio
 

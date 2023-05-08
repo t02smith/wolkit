@@ -1,0 +1,41 @@
+from wolkit.auth.oauth import pwd_context
+from wolkit.db.con import db_con, db_cursor
+from typing import List
+from wolkit.auth.user import User
+from typing import Union
+
+
+def user_tuple_factory(u):
+    return User(**{
+        "id": u[0],
+        "username": u[1],
+        "password": u[2],
+        "admin": u[3] == 1
+    })
+
+def create_users_table():
+    db_cursor.execute("""CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        admin INTEGER NOT NULL
+    )""")
+
+    create_new_user("admin", "admin", True)
+
+
+def create_new_user(username: str, password: str, admin: bool = False):
+    db_cursor.execute(
+        "INSERT INTO users (username, password, admin) VALUES (?, ?, ?)",
+        (username, pwd_context.hash(password), 1 if admin else 0)
+    )
+    db_con.commit()
+
+
+def get_all_users() -> List[User]:
+    return [user_tuple_factory(u) for u in db_cursor.execute("SELECT * FROM users").fetchall()]
+
+
+def get_user_by_username(username: str) -> Union[User, None]:
+    res = db_cursor.execute("SELECT * FROM users WHERE username=?", [username]).fetchone()
+    return None if res is None else user_tuple_factory(res)

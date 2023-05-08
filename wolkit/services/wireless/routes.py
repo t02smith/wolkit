@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
-import db.watchers as wat_db
-from lib.watchers import WatcherDevice
+import services.wireless.db as wat_db
+from services.wireless.watcher import WatcherDevice
 
 watchers_router = APIRouter(prefix="/watchers")
 

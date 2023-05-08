@@ -1,9 +1,9 @@
-from db.devices import create_devices_table
-from db.schedule import create_schedules_table
-from db.watchers import create_watchers_table, create_watchers_mapping_table
-from db.services import create_services_table
-from db import _connection
+from devices.db import create_devices_table
+from services.schedule.db import create_schedules_table
+from services.wireless.db import create_watchers_table, create_watchers_mapping_table
+from services.db import create_services_table
 import logging as log
+from db.connection import db_con
 
 
 def setup_db():
@@ -14,4 +14,4 @@ def setup_db():
     create_watchers_mapping_table()
     create_services_table()
     log.info("db set up successfully")
-    _connection.commit()
+    db_con.commit()

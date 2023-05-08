@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-import db.schedule as schedule_db
+from wolkit.services.schedule import db as schedule_db
 from pydantic import BaseModel
-from lib.schedule import Schedule
+from wolkit.services.schedule.schedule import Schedule
 from typing import List
 
 schedules_router = APIRouter(prefix="/{device_id}/schedule")

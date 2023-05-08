@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException
 
-import errors.devices
-from routes.schedule import schedules_router
+import wolkit.devices.errors
+from wolkit.services.schedule.routes import schedules_router
 from typing import List
-from lib.devices import WakeableDevice
-import db.devices as dev_db
+from wolkit.devices.device import WakeableDevice
+import wolkit.devices.db as dev_db
 from pydantic import BaseModel
 
 devices_router = APIRouter(prefix="/devices")
@@ -44,7 +44,7 @@ async def create_new_device(device: WakeableDeviceRequest) -> WakeableDevice:
             "id": 0,
             "status": 2
         }))
-    except errors.devices.DeviceDetailsAlreadyUsed as e:
+    except devices.errors.DeviceDetailsAlreadyUsed as e:
         raise HTTPException(status_code=400, detail=e.args[0])
 
 

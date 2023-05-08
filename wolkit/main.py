@@ -1,10 +1,9 @@
 from fastapi import FastAPI
-from routes import router
+from wolkit.router import router
 import uvicorn
 from db.setup import setup_db
-from db.services import get_services
-from lib.services import enable_service
-import asyncio
+from services.db import get_services
+from services.services import enable_service
 import logging
 
 HOST_IP_ADDRESS: str = "192.168.43.75"
