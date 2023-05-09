@@ -11,7 +11,7 @@ def get_all_schedules(db: Session):
 
 
 def get_schedules_for_device(device_id: int, db: Session):
-    return db.query(ScheduleModel).filter(ScheduleModel.device_id == device_id).all()
+    return db.query(ScheduleModel).filter_by(device_id=device_id).all()
 
 
 def create_new_schedule(device_id: int, schedule: ScheduleCreate, db: Session):

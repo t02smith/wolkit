@@ -9,19 +9,16 @@ class WatcherDevice(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    mac_addr = Column(String, unique=True, nullable=False)
-    bluetooth = Column(Boolean, nullable=False)
-
-    ip_addr = Column(String, unique=True, nullable=False)
-    lan = Column(Boolean, nullable=False)
+    bluetooth_mac_addr = Column(String, unique=True, nullable=False)
+    lan_ip_addr = Column(String, unique=True, nullable=False)
 
     timeout_minutes = Column(Integer, nullable=False)
-    last_checked = Column(Integer, nullable=True)
+    last_checked = Column(Integer, default=-1, nullable=False)
 
-    wakes = relationship("WakeableDevice", back_populates="waked_by", secondary="watchers_mapping", lazy=True)
+    watcher_mappings = relationship("WatcherDeviceMapping", back_populates="watches")
 
     def in_timeout(self) -> bool:
-        if self.last_checked is None:
+        if self.last_checked == -1:
             return False
 
         timestamp = int(time.time())
@@ -29,7 +26,14 @@ class WatcherDevice(Base):
 
 
 class WatcherDeviceMapping(Base):
-    __tablename__ = "watchers_mapping"
+    __tablename__ = "watcher_device_mapping"
 
     watcher_device_id = Column(Integer, ForeignKey("watchers.id"), primary_key=True)
+    watches = relationship("WatcherDevice", back_populates="watcher_mappings")
+
     wake_device_id = Column(Integer, ForeignKey("devices.id"), primary_key=True)
+    wakes = relationship("WakeableDevice", back_populates="woken_by_mappings")
+
+    bluetooth = Column(Boolean, nullable=False)
+    lan = Column(Boolean, nullable=False)
+    sniff_traffic = Column(Boolean, nullable=False)

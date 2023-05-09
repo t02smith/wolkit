@@ -6,7 +6,7 @@ from auth.token import get_current_user
 from auth.model import User
 from db.connection import get_db
 from services.wireless.schema import WatcherDevice as WatcherDeviceSchema, WatcherDeviceCreate, WatcherDevicePatch, \
-    WatcherDeviceUpdate
+    WatcherDeviceUpdate, WatcherDeviceMappingCreate
 
 watchers_router = APIRouter(prefix="/watchers")
 
@@ -38,13 +38,16 @@ async def get_watcher(watcher_id: int, user: User = Depends(get_current_user), d
 @watchers_router.post(
     "/",
     status_code=201,
-    description="Create a new watcher",
+    description="Create a new watcher by submitting some details about it. The bluetooth_mac_addr refers to your "
+                "watcher device's unique bluetooth address and remembed it may be different from you Wi-Fi MAC "
+                "address. Your lan_ip_addr refers to the device's IP address in the local network and for best "
+                "results ensure that it is static. The timeout means that this device will only trigger devices to "
+                "wake up once for every given time period, ",
     response_model=WatcherDeviceSchema,
     tags=["Watcher"],
     name="Create a new watcher"
 )
-async def new_watcher(watcher: WatcherDeviceCreate, user: User = Depends(get_current_user),
-                      db: Session = Depends(get_db)):
+async def new_watcher(watcher: WatcherDeviceCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return wat_db.create_watcher(watcher, db)
 
 
@@ -56,9 +59,9 @@ async def new_watcher(watcher: WatcherDeviceCreate, user: User = Depends(get_cur
     tags=["Watcher"],
     name="Map Watcher to Target"
 )
-async def map_watcher_to_target(watcher_id: int, device_id: int, user: User = Depends(get_current_user),
+async def map_watcher_to_target(watcher_id: int, device_id: int, mapping: WatcherDeviceMappingCreate, user: User = Depends(get_current_user),
                                 db: Session = Depends(get_db)):
-    return wat_db.map_watcher_to_wakeable_device(watcher_id, device_id, db)
+    return wat_db.map_watcher_to_wakeable_device(watcher_id, device_id, mapping, db)
 
 
 @watchers_router.delete(

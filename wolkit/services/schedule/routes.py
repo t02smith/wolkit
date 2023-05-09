@@ -6,22 +6,12 @@ from auth.model import User
 from db.connection import get_db
 from router.responses import GenericResponse
 from services.schedule import queries as schedule_db
-from pydantic import BaseModel
 from services.schedule.schema import ScheduleCreate, Schedule as ScheduleSchema
 
 schedules_router = APIRouter(prefix="/{device_id}/schedule")
 
 
 # request types
-
-class ScheduleRequest(BaseModel):
-    weekday: int
-    hour: int
-    minute: int
-
-
-#
-
 @schedules_router.get(
     "/all",
     status_code=200,

@@ -1,37 +1,46 @@
 from scapy.all import *
-import devices.queries as dev_db
-import logging as log
+from sqlalchemy.orm import Session
+from typing import List
+from services.wireless.model import WatcherDeviceMapping
+from services.wireless.queries import get_sniff_traffic_mappings
 
 
-async def listen_for_packets(host_ip_addr: str) -> None:
+async def listen_for_packets(db: Session) -> None:
     """
     Listen for incoming packets to registered devices and wake them if any appear
-    :param host_ip_addr: the local ip address of this machine
     :return: None
     """
-    log.info("starting device listener")
-    devices = dev_db.get_all_devices()
-    if len(devices) == 0:
-        log.debug("No tracked devices => listen not started")
+    print("enabling service packet listener")
+    mappings = get_sniff_traffic_mappings(db)
+
+    if len(mappings) == 0:
+        print("No tracked devices => listen not started")
         return
 
-    for d in devices:
+    for mapping in mappings:
         sniffer = AsyncSniffer(
-            filter=f"icmp and dst host {d.ip_addr} and not src {host_ip_addr}",
-            prn=lambda p: packet_callback(p, d),
+            filter=f"dst host {mapping.watches.lan_ip_addr} and not arp",
+            prn=lambda p: packet_callback(p, mapping.watches, mapping.wakes, db),
             store=False)
         sniffer.start()
 
-    log.info("Started packet listeners")
+    print("Started packet listeners")
 
 
-def packet_callback(pkt, device) -> None:
+def packet_callback(pkt, watcher, device, db) -> None:
     """
     Called every time a valid packet is received
     :param pkt: the packet received
+    :param watcher
     :param device: the device that this packet was sent to
     """
+    if watcher.in_timeout():
+        return
+
+    print(f"waking {device.alias}")
     device.wake()
+    watcher.last_checked = int(time.time())
+    db.commit()
 
 
 

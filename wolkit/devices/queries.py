@@ -24,7 +24,7 @@ def get_device_by_id(device_id: int, db: Session = Depends(get_db)):
     """
     Get a wakeable device using its ID from the DB
     """
-    d = db.query(WakeableDeviceModel).filter(WakeableDeviceModel.id == device_id).first()
+    d = db.query(WakeableDeviceModel).filter_by(id=device_id).first()
     if not d:
         raise err_dev.DeviceNotFoundError(device_id)
 
@@ -41,7 +41,7 @@ def new_device(device: WakeableDeviceCreate, db: Session):
     """
     d = WakeableDeviceModel(
         alias=device.alias,
-        mac_addr=device.mac_addr,
+        mac_addr=device.mac_addr.upper(),
         ip_addr=device.ip_addr
     )
     db.add(d)
@@ -56,15 +56,15 @@ def delete_device(device_id: int, db: Session):
     Delete a device from the database.
     This will include any records from the watchers or scheduling tables that reference it
     """
-    db.query(Schedule).filter(Schedule.device_id == device_id).delete()
-    db.query(WatcherDeviceMapping).filter(WatcherDeviceMapping.wake_device_id == device_id).delete()
-    db.query(WakeableDeviceModel).filter(WakeableDeviceModel.id == device_id).delete()
+    db.query(Schedule).filter_by(device_id=device_id).delete()
+    db.query(WatcherDeviceMapping).filter_by(wake_device_id=device_id).delete()
+    db.query(WakeableDeviceModel).filter(id=device_id).delete()
 
     db.commit()
 
 
 def patch_device(device_id: int, update: WakeableDevicePatch, db: Session):
-    d: WakeableDeviceModel = db.query(WakeableDeviceModel).filter(WakeableDeviceModel.id == device_id).first()
+    d = db.query(WakeableDeviceModel).filter_by(id=device_id).first()
     if not d:
         raise err_dev.DeviceNotFoundError(device_id)
 
@@ -83,7 +83,7 @@ def patch_device(device_id: int, update: WakeableDevicePatch, db: Session):
 
 
 def update_device(device_id: int, update: WakeableDevicePatch, db: Session):
-    d: WakeableDeviceModel = db.query(WakeableDeviceModel).filter(WakeableDeviceModel.id == device_id).first()
+    d = db.query(WakeableDeviceModel).filter_by(id=device_id).first()
     if not d:
         raise err_dev.DeviceNotFoundError(device_id)
 

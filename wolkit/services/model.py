@@ -1,13 +1,10 @@
-from pydantic import BaseModel
-import logging as log
-
 from sqlalchemy.orm import Session, sessionmaker
-from services.schedule.model import schedule_service
+from services.schedule.service import schedule_service
 from services.wireless.sniffer import listen_for_packets
 from services.wireless.lan import watch_LAN
 from services.wireless.bluetooth import watch_bluetooth
 import asyncio
-from db.connection import Base
+from db.connection import Base, SessionLocal
 from sqlalchemy import Column, Integer, String, event, Boolean
 
 
@@ -29,10 +26,10 @@ services = {
     "scheduler": {
         "obj": Service(name="scheduler", description="Schedules days and times each week to wake a device.", active=1),
         "method": schedule_service},
-    # "sniffer": {"obj": Service(name="sniffer",
-    #                            description="Listens for packets being sent to a target computer and will wake the "
-    #                                        "device if need be.",
-    #                            active=0), "method": listen_for_packets},
+    "sniffer": {"obj": Service(name="sniffer",
+                               description="Listens for packets being sent to a target computer and will wake the "
+                                           "device if need be.",
+                               active=0), "method": listen_for_packets},
     "lan": {"obj": Service(name="lan",
                            description="Listens for packets being sent to a target computer and will wake the device "
                                        "if need be.",
@@ -55,8 +52,18 @@ def insert_default_service_records(target, connection, **kwargs):
 event.listen(Service.__table__, "after_create", insert_default_service_records)
 
 
-def enable_all_services(db: Session):
+def start_services():
+    """
+    Starts any services that are pitched to run on application startup
+    """
+    db = SessionLocal()
 
+    s_ls = db.query(Service).filter_by(active=True).all()
+    for s in s_ls:
+        enable_service(s.name, db)
+
+
+def enable_all_services(db: Session):
     for s in services:
         if s not in running_services:
             continue
@@ -79,14 +86,14 @@ def enable_service(service_name: str, db: Session) -> None:
     :return: None
     """
     if service_name not in services:
-        log.warning("service not found")
+        print("service not found")
         return
 
     if service_name in running_services:
-        log.warning("service already running")
+        print("service already running")
         return
 
-    log.info(f"enabling service {service_name}")
+    print(f"enabling service {service_name}")
     running_services[service_name] = asyncio.get_event_loop().create_task(services[service_name]["method"](db))
 
 
@@ -97,14 +104,14 @@ def disable_service(service_name: str) -> None:
     :return: None
     """
     if service_name not in services:
-        log.warning("service not found")
+        print("service not found")
         return
 
     if service_name not in running_services:
-        log.warning("service not running")
+        print("service not running")
         return
 
-    log.info(f"disabling service {service_name}")
+    print(f"disabling service {service_name}")
     task = running_services[service_name]
     task.cancel()
     del (running_services[service_name])

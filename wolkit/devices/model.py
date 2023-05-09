@@ -33,21 +33,22 @@ class WakeableDevice(Base):
 
     #
     schedules = relationship("Schedule", back_populates="device", lazy=True)
-    waked_by = relationship("WatcherDevice", back_populates="wakes", secondary="watchers_mapping", lazy=True)
+    woken_by_mappings = relationship("WatcherDeviceMapping", back_populates="wakes")
 
     def wake(self) -> None:
         """
         Wake a device up from sleep if it is not already awake
         :return: None
         """
-        if self.status == WakeableDeviceStatus.UNKNOWN:
-            self.status = WakeableDeviceStatus.ACTIVE if is_active(self.ip_addr) else WakeableDeviceStatus.INACTIVE
+        if self.status == WakeableDeviceStatus.UNKNOWN.value:
+            self.status = WakeableDeviceStatus.ACTIVE.value if is_active(self.ip_addr) else WakeableDeviceStatus.INACTIVE.value
 
-        if self.status == WakeableDeviceStatus.ACTIVE:
+        if self.status == WakeableDeviceStatus.ACTIVE.value:
+            print(f"Device {self.mac_addr} already awake => terminating")
             return
 
         send_magic_packet(self.mac_addr, "192.168.1.255")
-        self.status = WakeableDeviceStatus.ACTIVE
+        self.status = WakeableDeviceStatus.ACTIVE.value
 
 
 def is_active(ip_addr: str) -> bool:

@@ -9,7 +9,7 @@ def get_all_services(db: Session):
 
 
 def set_service(service_name: str, new_value: bool, db: Session):
-    service: ServiceModel = db.query(ServiceModel).filter(ServiceModel.name == service_name).first()
+    service = db.query(ServiceModel).filter_by(name=service_name).first()
     if not service:
         raise ServiceNotFoundError(service_name)
 
@@ -17,7 +17,7 @@ def set_service(service_name: str, new_value: bool, db: Session):
         raise ServiceAlreadyEnabledError(service_name) if service.active else ServiceAlreadyDisabledError(service_name)
 
     if new_value:
-        enable_service(service_name)
+        enable_service(service_name, db)
     else:
         disable_service(service_name)
 
@@ -40,7 +40,7 @@ def set_all_services(new_value: bool, db: Session):
 
 
 def restart_service(service_name: str, db: Session):
-    service: ServiceModel = db.query(ServiceModel).filter(ServiceModel.name == service_name).first()
+    service = db.query(ServiceModel).filter_by(name=service_name).first()
     if not service:
         raise ServiceNotFoundError(service_name)
 

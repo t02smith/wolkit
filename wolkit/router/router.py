@@ -12,3 +12,6 @@ router.include_router(services_router)
 router.include_router(auth_router)
 
 app.include_router(router)
+
+
+

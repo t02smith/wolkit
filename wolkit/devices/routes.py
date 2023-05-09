@@ -1,11 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
 from auth.token import get_current_user
 from auth.model import User
 from db.connection import get_db
+from router.responses import GenericResponse
 from services.schedule.routes import schedules_router
-from typing import List
 from devices.schema import *
 from devices.model import WakeableDevice as WakeableDeviceModel
 import devices.queries as dev_db
@@ -58,15 +57,17 @@ async def create_new_device(device: WakeableDeviceCreate, user: User = Depends(g
 
 @devices_router.post(
     "/{device_id}/wake",
-    status_code=204,
+    status_code=200,
     name="Wake a Device",
     description="Sends a magic packet over LAN to wake your device up from sleep mode. Remember your device will take "
                 "time to boot up.",
     summary="Wake up one of your devices.",
-    tags=["Device Management"]
+    tags=["Device Management"],
+    response_model=GenericResponse
 )
 async def wake_device(device: WakeableDeviceModel = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
     device.wake()
+    return GenericResponse(message=f"Magic packet sent to device {device.alias}")
 
 
 @devices_router.delete(
