@@ -1,6 +1,7 @@
 import uvicorn
 import router.router
 import router.advice
+from router.app import app
 
 
 if __name__ == "__main__":

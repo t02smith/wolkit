@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from db.setup import setup_db
 from services.model import start_services
 
+
 with open("static/description.md", "r") as f:
     description = f.read()
 
