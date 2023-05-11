@@ -1,5 +1,9 @@
+from typing import List
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from starlette.responses import JSONResponse
+
 from auth.token import get_current_user
 from auth.model import User
 from db.connection import get_db
@@ -25,9 +29,12 @@ class WakeableDeviceRequest(BaseModel):
     "/all",
     status_code=200,
     name="Get All Devices",
-    description="Get a list of all your recorded devices. These devices can be woken up by this API.",
+    description="Get a list of all your recorded devices. These devices can be woken up by this API by sending a "
+                "magic packet to them and this can be triggered automatically using any of the services..",
     summary="Returns a list of all recorded devices.",
-    tags=["Device Management"])
+    tags=["Device Management"],
+    response_model=List[WakeableDevice]
+)
 async def get_all_devices(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return dev_db.get_all_devices(db)
 
@@ -38,9 +45,10 @@ async def get_all_devices(user: User = Depends(get_current_user), db: Session = 
     name="Get a device",
     description="Get an existing device using its unique ID",
     summary="Get an existing device",
-    tags=["Device Management"]
+    tags=["Device Management"],
+    response_model=WakeableDevice
 )
-async def delete_device(device: WakeableDeviceModel = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
+async def get_device(device: WakeableDeviceModel = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
     return device
 
 
@@ -50,7 +58,9 @@ async def delete_device(device: WakeableDeviceModel = Depends(dev_db.get_device_
     name="Create a New Device",
     description="Create a new device to track and use within this API",
     summary="Record a new device.",
-    tags=["Device Management"])
+    tags=["Device Management"],
+    response_model=WakeableDevice
+)
 async def create_new_device(device: WakeableDeviceCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return dev_db.new_device(device, db)
 

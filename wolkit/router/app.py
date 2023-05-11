@@ -9,11 +9,7 @@ with open("static/description.md", "r") as f:
 app = FastAPI(
     title="Wake-on-LAN Kit",
     description=description,
-    version="0.1",
-    contact={
-        "name": "Tom Smith",
-        "email": "tcs1g20@soton.ac.uk"
-    },
+    version="0.2",
     openapi_tags=[
         {
             "name": "Scheduler",
@@ -36,6 +32,10 @@ app = FastAPI(
             "name": "Users",
             "description": "Relates to the users in the application. There will only be a singular admin user who has "
                            "permission to do everything. It is recommended that they change their password immediately."
+        },
+        {
+            "name": "Environment",
+            "description": "Listen to environmental factors using the Enviro hat from Pimoroni."
         }
     ],
     debug=True
