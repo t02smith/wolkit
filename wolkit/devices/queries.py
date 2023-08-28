@@ -41,7 +41,7 @@ def new_device(device: WakeableDeviceCreate, db: Session):
     """
     d = WakeableDeviceModel(
         alias=device.alias,
-        mac_addr=device.mac_addr.upper(),
+        mac_addr=device.mac_addr.lower(),
         ip_addr=device.ip_addr
     )
     db.add(d)

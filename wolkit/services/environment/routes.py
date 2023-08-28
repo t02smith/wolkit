@@ -13,9 +13,9 @@ env_router = APIRouter(prefix="/environment")
     "/watch",
     status_code=201,
     description="Here you can add a new environment listener that will consider various external factors to wake a "
-                "device. The following fields are available\n1. Temperature 'temperature'\n"
-                "2. Light 'light'\n3. Noise 'noise'\n4. Proximity 'proximity'\nIt is recommended that you use the "
-                "example python files from Pimorini to find values for these that suit your neeeds",
+                "device. The following fields are available\n1. Temperature 'temperature' in degrees Celsius\n"
+                "2. Light 'light' in Lux\n3. Noise 'noise'\n4. Proximity 'proximity'\nIt is recommended that you use "
+                "the example python files from Pimorini to find values for these that suit your needs",
     summary="Add a new environment listener",
     tags=["Environment"]
 )

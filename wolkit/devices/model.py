@@ -43,9 +43,9 @@ class WakeableDevice(Base):
         if self.status == WakeableDeviceStatus.UNKNOWN.value:
             self.status = WakeableDeviceStatus.ACTIVE.value if is_active(self.ip_addr) else WakeableDeviceStatus.INACTIVE.value
 
-        if self.status == WakeableDeviceStatus.ACTIVE.value:
-            print(f"Device {self.mac_addr} already awake => terminating")
-            return
+        # if self.status == WakeableDeviceStatus.ACTIVE.value:
+        #     print(f"Device {self.mac_addr} already awake => terminating")
+        #     return
 
         send_magic_packet(self.mac_addr, "192.168.1.255")
         self.status = WakeableDeviceStatus.ACTIVE.value

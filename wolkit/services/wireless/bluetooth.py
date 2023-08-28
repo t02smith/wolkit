@@ -21,7 +21,7 @@ async def watch_bluetooth(db: Session):
     while True:
         print("starting bluetooth scan")
         found_devices = set(map(
-            lambda bd: bd[0],
+            lambda bd: bd[0].lower(),
             bluetooth.discover_devices(duration=4, lookup_names=True, flush_cache=True, lookup_class=False)))
         print(f"found bluetooth devices {found_devices}")
 

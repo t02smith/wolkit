@@ -7,6 +7,8 @@
 
 ### Docker
 
+Run the following command then head to [http://localhost:5055](http://localhost:5055)
+
 ```bash
 docker build -t wolkit-img .
 docker run -d --name wolkit -p 5055:5055 wolkit-img

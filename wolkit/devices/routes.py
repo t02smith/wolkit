@@ -1,3 +1,5 @@
+import asyncio
+import time
 from typing import List
 
 from fastapi import APIRouter, Depends
@@ -76,6 +78,7 @@ async def create_new_device(device: WakeableDeviceCreate, user: User = Depends(g
     response_model=GenericResponse
 )
 async def wake_device(device: WakeableDeviceModel = Depends(dev_db.get_device_by_id), user: User = Depends(get_current_user)):
+    await asyncio.sleep(10)
     device.wake()
     return GenericResponse(message=f"Magic packet sent to device {device.alias}")
 

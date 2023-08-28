@@ -10,7 +10,7 @@ class EnvironmentalFactor(Enum):
 
 
 class EnvironmentListenerBase(BaseModel):
-    above_or_below_threshold: bool
+    when_over_threshold: bool
     environmental_factor: EnvironmentalFactor
     threshold: float
     device_id: int

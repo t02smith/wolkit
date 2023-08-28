@@ -31,8 +31,8 @@ def get_watcher_by_id(watcher_id: int, db: Session):
 
 def create_watcher(watcher: WatcherDeviceCreate, db: Session):
     new_watcher = WatcherDeviceModel(
-        mac_addr=watcher.bluetooth_mac_addr.upper(),
-        ip_addr=watcher.lan_ip_addr,
+        bluetooth_mac_addr=watcher.bluetooth_mac_addr.lower(),
+        lan_ip_addr=watcher.lan_ip_addr,
         timeout_minutes=watcher.timeout_minutes
     )
     db.add(new_watcher)
@@ -82,7 +82,7 @@ def patch_watcher(watcher_id: int, update: WatcherDevicePatch, db: Session):
         raise WatcherNotFoundError(watcher_id)
 
     if update.bluetooth_mac_addr is not None:
-        w.mac_addr = update.bluetooth_mac_addr.upper()
+        w.mac_addr = update.bluetooth_mac_addr.lower()
 
     if update.lan_ip_addr is not None:
         w.ip_addr = update.lan_ip_addr
@@ -100,7 +100,7 @@ def update_watcher(watcher_id: int, update: WatcherDeviceUpdate, db: Session):
     if not w:
         raise WatcherNotFoundError(watcher_id)
 
-    w.bluetooth_mac_addr = update.bluetooth_mac_addr.upper()
+    w.bluetooth_mac_addr = update.bluetooth_mac_addr.lower()
     w.lan_ip_addr = update.lan_ip_addr
     w.timeout_minutes = update.timeout_minutes
 

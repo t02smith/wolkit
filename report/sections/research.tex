@@ -1,0 +1,52 @@
+
+\section{Research}
+
+\subsection{Wake-on-LAN}
+
+Wake-on-LAN is a network standard that allows remote devices to be turned on by sending a \textit{magic packet} to it. It was first introduced in 1998\footnote{\url{https://web.archive.org/web/20121012155338/http://www-03.ibm.com/press/us/en/pressrelease/2705.wss} (Accessed 09/05/2023)} by the Advanced Manageability Alliance (AMA); this alliance consisted of several large tech companies and was created with the purpose of introducing standards that would helped streamline computer management.
+Some examples of standards introduced by the AMA are: Desktop Management Interface\footnote{\url{https://www.dmtf.org/standards/dmi} (Accessed 09/05/2023)}, Alert Standard Format\footnote{\url{https://www.dmtf.org/standards/asf} (Accessed 09/05/2023)}, and Common Information Model\footnote{\url{https://www.dmtf.org/standards/cim} (Accessed 09/05/2023)}.
+
+\vspace{2mm}
+\subsubsection{Magic Packet}
+
+A magic packet is a frame with a 102 byte payload that consists of: 
+
+\begin{itemize}[noitemsep]
+    \item 6 bytes that are all \textit{0xff}, and
+    \item 16 copies of the target device's MAC address.
+\end{itemize}
+
+The target device's network interface card (NIC) will be listening for this packet whilst in a low-power mode; when it is broadcast over the network the target device's NIC will send a command to the power supply or motherboard to wake the system up.
+
+\vspace{2mm}
+\subsubsection{Limitations}
+
+The Wake-on-LAN standard doesn't include any form of delivery confirmation so there is now way to know if the magic packet sent is received or acted upon. 
+
+\subsection{Waking Non IP-Based Device}
+
+Wake-on-LAN uses an IP packet and as such cannot be sent to devices that don't use IP; these are commonly IoT devices and will use protocols like Zigbee to communicate. Han et al looked at using Zigbee to control power outlets in their paper \textit{Remote-controllable and energy-saving room architecture based on ZigBee communication}~\cite{han_remote-controllable_2009}; devices can be toggled using an IR remote or will automatically be turned off when the power output from the socket falls below a certain threshold.
+
+\subsection{Device Discovery}
+
+\vspace{2mm}
+\subsubsection{Over Wireless LAN}
+
+If we are aware of the device's IP address then it is trivial to discover if it is active by sending it a simple request, such as an ARP request, and wait for a response.
+\x
+Zhou et al describe a system called \textit{ZiFi}~\cite{zhou_zifi_2010}, which uses Zigbee radios to identify the existence of local WiFi networks; this was with the aim of reducing the power requirement needed for a device to discover local WiFi networks. Whilst the use of Zigbee is promising for device discovery, most devices will not come fitted with Zigbee radios. 
+
+\vspace{2mm}
+\subsubsection{Bluetooth}
+
+Bluetooth is a short-range, low-bandwidth, low-power wireless communication protocol that is commonly found in battery powered devices. Bluetooth devices organise themselves into \textit{piconets}, which consist of one \textit{master} and up to seven \textit{slave} devices. Each device in the same piconet will have the same frequency hopping sequence that will determined by the master. The formation of a piconet has two steps:
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Inquiry} A master device will discover neighbouring slave devices, and
+    \item \textbf{Page} Connections are established between devices.
+\end{enumerate}
+
+During the inquiry phase, the master will broadcast an inquiry packet and scan for replies. If a slave wants to be discovered then it will periodically scan for inquiry packets and send a response if they find one. In their paper \textit{A formal analysis of bluetooth discovery}~\cite{duflot_formal_2006}, Duflot et al give a review of the performance of device discovery in Bluetooth v1.2 and v1.1.
+A similar analysis of Bluetooth 4.0 is given by Cho et al in their paper \textit{Performance analysis of device discovery of Bluetooth Low Energy (BLE) networks}~\cite{cho_performance_2016}.
+\x
+Cross et al showed it was possible to discover devices that are not scanning for and replying to inquiry packets in their paper \textit{Detecting non-discoverable Bluetooth devices}~\cite{goetz_detecting_2007}. This was achieved using an `enhanced brute force search attack`; this relied on already knowing the device's MAC address but would still take a considerable amount of time, where most Bluetooth devices would take around 18 hours. 

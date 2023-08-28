@@ -1,0 +1,42 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{hyperref}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\usepackage[inline]{enumitem}
+\newcommand{\x}{\vspace{2mm}\\}
+    
+\begin{document}
+
+\title{Using Wake-on-LAN to Manage Home Devices}
+
+\author{\IEEEauthorblockN{Thomas Smith}
+\IEEEauthorblockA{\textit{tcs1g20@soton.ac.uk} \\
+\textit{University of Southampton}}}
+
+\maketitle
+
+\begin{abstract}
+Idle devices result in a large amount of wasted energy within households every day. Through the Wake-on-LAN standard, this paper proposes a convenient way to power your devices on based upon environmental factors. This includes scheduling times, detecting nearby devices, and based upon environmental factors. Users interact with the application using a web API, which allows for easy remote access and control of home devices.
+\end{abstract}
+
+\input{sections/intro}
+\input{sections/goals}
+\input{sections/research}
+\input{sections/design}
+\input{sections/impl}
+\input{sections/lims}
+\input{sections/eval}
+
+\bibliographystyle{ieeetr}
+\bibliography{ref}
+
+\end{document}
